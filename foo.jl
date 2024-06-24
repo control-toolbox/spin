@@ -1,2 +1,3 @@
-using OptimalControl
+# foo.jl
 
+using OptimalControl
