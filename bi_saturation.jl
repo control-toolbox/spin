@@ -25,6 +25,7 @@ u_init = sol1.control
 q_init(t) = [sol1.state(t); sol1.state(t)]
 tf_init = sol1.variable
 
+
 @def ocp2 begin
     tf ∈ R, variable
     t ∈ [0, tf], time
@@ -89,28 +90,19 @@ end
 ocpf = f(0.1)
 initial_g = solve(ocpu, grid_size=100)
 
-sol_f = solve(ocpf,  grid_size=100, init=initial_g)
-solf200 = solve(ocpf,  grid_size=200, init=sol_f)
-solf300 = solve(ocpf, grid_size=300, init=solf200)
-solf400 = solve(ocpf, grid_size=400, init=solf300)
-solf500 = solve(ocpf, grid_size=500, init=solf400)
-solf600 = solve(ocpf, grid_size=600, init=solf500)
-solf700 = solve(ocpf, grid_size=700, init=solf600)
-solf800 = solve(ocpf, grid_size=800, init=solf700)
-solf800.variable
-solf900 = solve(ocpf, grid_size=900, init=solf800)
-solf900.variable
-solf1000 = solve(ocpf, grid_size=1000, init=solf900)
-solf1000.variable
-
+for i in 1:10
+    global initial_g 
+    solf = solve(ocpf,  grid_size= i*100, init=initial_g)
+    initial_g = solf
+end 
 #Figures:
 using Plots
-q = solf1000.state
-liste = [q(t) for t in solf1000.times]
+q = initial_g.state
+liste = [q(t) for t in initial_g.times]
 liste_y1 = [elt[1] for elt in liste ]
 liste_z1 = [elt[2] for elt in liste ]
 liste_y2 = [elt[3] for elt in liste ]
 liste_z2 = [elt[4] for elt in liste ]
 plot(liste_y1, liste_z1, xlabel="y1", ylabel="z1")
 plot(liste_y2, liste_z2)
-plot(solf1000.control, solf1000.times)
+plot(initial_g.control, initial_g.times)
