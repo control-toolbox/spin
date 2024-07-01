@@ -41,11 +41,20 @@ sol1 = solve(ocp1,  grid_size=100)
 L = [sol1]
 for i in 1:10
     x₀ = i/10 * [0, 1, 0, 1] + (1 - i/10) * [1, 0, 1, 0]
-    ocpi = f(x₀)
+    global ocpi = f(x₀)
     sol_i = solve(ocpi, grid_size=100, init=L[end])
     global L 
     push!(L, sol_i)
 end
 solution = L[end]
 solution.variable
-plot(solution)
+solution2 = solve(ocpi, grid_size=300, init=solution)
+q = solution2.state
+liste = [q(t) for t in solution2.times]
+liste_y1 = [elt[1] for elt in liste ]
+liste_z1 = [elt[2] for elt in liste ]
+liste_y2 = [elt[3] for elt in liste ]
+liste_z2 = [elt[4] for elt in liste ]
+plot(liste_y1, liste_z1, xlabel="y1", ylabel="z1")
+plot(liste_y2, liste_z2)
+plot(solution2.control, solution2.times)

@@ -91,7 +91,7 @@ ocpf = f(0.1)
 initial_g = solve(ocpu, grid_size=100)
 
 for i in 1:10
-    global initial_g 
+    #global initial_g 
     solf = solve(ocpf,  grid_size= i*100, init=initial_g)
     initial_g = solf
 end 
@@ -104,5 +104,5 @@ liste_z1 = [elt[2] for elt in liste ]
 liste_y2 = [elt[3] for elt in liste ]
 liste_z2 = [elt[4] for elt in liste ]
 plot(liste_y1, liste_z1, xlabel="y1", ylabel="z1")
-plot(liste_y2, liste_z2)
+plot(liste_y2, liste_z2, xlabel="y2", ylabel="z2")
 plot(initial_g.control, initial_g.times)
