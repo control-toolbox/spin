@@ -28,13 +28,23 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
         with:
-          source: ./
-          destination: ./_site
+          ruby-version: '2.7'  # Specify the Ruby version for Jekyll
+
+      - name: Install Jekyll and Bundler
+        run: gem install jekyll bundler
+
+      - name: Install Julia
+        uses: julia-actions/setup-julia@latest
+        with:
+          version: '1.8'  # Specify the Julia version you need
+
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --destination ./_site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
