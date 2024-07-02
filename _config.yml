@@ -10,21 +10,15 @@
 ############################
 
 # Name of website
-title: My website
+title: spin
 
-# Your name to show in the footer
-author: Some Person
+
 
 ###############################################
 # --- List of links in the navigation bar --- #
 ###############################################
 
-navbar-links:
-  About Me: "aboutme"
-  Resources:
-    - Beautiful Jekyll: "https://beautifuljekyll.com"
-    - Learn markdown: "https://www.markdowntutorial.com/"
-  Author's home: "https://deanattali.com"
+
 
 ################
 # --- Logo --- #
