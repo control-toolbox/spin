@@ -32,7 +32,7 @@ jobs:
       - name: Set up Ruby
         uses: actions/setup-ruby@v1
         with:
-          ruby-version: '2.7'  # Specify the Ruby version for Jekyll
+          ruby-version: '3.1'  # Specify the Ruby version for Jekyll
 
       - name: Install Jekyll and Bundler
         run: gem install jekyll bundler
