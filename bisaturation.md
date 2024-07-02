@@ -2,12 +2,12 @@
 The problem we are trying to solve is the $P_{BS}$ problem, also known as the *time minimal saturation problem of a pair of spin-1/2 particles* (or bi-saturation problem), as described on page 18 of the paper [^1] . This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O := (0,0)$.
 
 ```math
-    \begin{cases}
+    \begin{cases*}
     J(u(\cdot), t_f) := t_f \rightarrow \min \\
     \dot{q}(t) = F(q(t)) + u(t) G(q(t)), \quad |u(t)| \leq 1, \quad t \in [0, t_f], \\
     q(0) = q_0, \\
     q(t_f) = q_f
-    \end{cases}
+    \end{cases*}
 ```
 where $q_0 = [0, 1, 0, 1]$, $q_f = [0, 0, 0, 0]$ and $F$ and $G$ are defined by equation 2 on page 5, as well as in sections 2.1 and 3.1. We use the control-toolbox functions to find both local and global solutions.
 
