@@ -144,6 +144,27 @@ tf_init = sol.variable
 Homotopy on ϵ to find a potential solution : 
 We define the function below that computes the problem depending on $ϵ$: 
 ```@example main
+    # Define the optimal control problem with parameter ϵ₀
+    function f(ϵ₀)
+        @def ocp begin
+            tf ∈ R, variable 
+            t ∈ [0, tf], time 
+            x ∈ R⁴, state    
+            u ∈ R, control    
+            tf ≥ 0            
+            -1 ≤ u(t) ≤ 1     
+            x(0) == [0, 1, 0, 1] 
+            x(tf) == [0, 0, 0, 0] 
+            
+            ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                    (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                    (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)), 
+                    (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+            tf → min 
+        end
+        return ocp
+    end
+```
 
 ```@example main
     ϵ = 0
@@ -168,6 +189,35 @@ Conclusion: The solution is a local one.
 Another approach involves defining a bi-saturation problem with a slightly adjusted initial condition: $q₀ = [0.1, 0.9, 0.1, 0.9]$.
 
 ##  Bi-Saturation Problem: Initial Guess from a Slightly Different Problem
+```@example main
+    
+    @def ocpu begin
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    x ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    x(0) == [0.1, 0.9, 0.1, 0.9] # Initial condition
+    x(tf) == [0, 0, 0, 0] # Terminal condition
+    ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
+              (γ*(1-x₂(t)) +u(t)*x₁(t)),
+              (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)),
+              (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+    tf → min
+    end
+    initial_g = solve(ocpu, grid_size=100)
+    ϵ₀ = 0.1
+    ocpf = f(ϵ₀)
+    for i in 1:10
+        solf = solve(ocpf, grid_size=i*100, init=initial_g)
+        initial_g = solf
+    end
+    # Plot the figures
+    plot_sol(initial_g)
+    # Conclusion: This solution seems to be the optimal one.
+
+```
 
 
 
