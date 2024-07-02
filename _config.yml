@@ -1,8 +1,42 @@
 # _config.yml
-markdown: kramdown
+
+# Site settings
+title: Your Site Title
+description: Your site description
+theme: your-theme-name  # Replace with your theme name
+
+# Markdown settings
+markdown: kramdown  # Specify the Markdown processor (kramdown is the default in Jekyll)
 kramdown:
-  input: GFM
-  math_engine: mathjax
-  syntax_highlighter: rouge
+  input: GFM  # Enable GitHub Flavored Markdown (GFM) for extended features
+  syntax_highlighter: rouge  # Use Rouge for syntax highlighting
+
+# GitHub Pages settings (optional)
+github:
+  is_project_page: false
+  show_downloads: true
+
+# Jekyll settings
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Collections (optional)
+collections:
+  bisaturation:
+    output: true
+    permalink: /bisaturation/:path/
+
+# Liquid tags for Julia code highlighting
 highlighter: rouge
-theme: minima
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# Dependencies
+gems:
+  - jekyll-mentions
+  - jekyll-redirect-from
+  - jekyll-sitemap
