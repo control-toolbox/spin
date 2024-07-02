@@ -3,29 +3,18 @@
 # Site settings
 title: Spin
 description: Your site description
-theme: jekyll-theme-minimal  # Replace with your theme name
+theme: jekyll-theme-minimal  
 
 # Markdown settings
-markdown: kramdown  # Specify the Markdown processor (kramdown is the default in Jekyll)
+markdown: kramdown  
 kramdown:
-  input: GFM  # Enable GitHub Flavored Markdown (GFM) for extended features
-  syntax_highlighter: rouge  # Use Rouge for syntax highlighting
-
-# GitHub Pages settings (optional)
-github:
-  is_project_page: false
-  show_downloads: true
+  input: GFM  
+  syntax_highlighter: rouge  
 
 # Jekyll settings
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-
-# Collections (optional)
-collections:
-  bisaturation:
-    output: true
-    permalink: /bisaturation/:path/
 
 # Liquid tags for Julia code highlighting
 highlighter: rouge
