@@ -4,6 +4,14 @@ Spin
 ## Lieu
 
 LJAD / McTAO, UniCA (Nice / Sophia)
+```math
+\begin{cases}
+J(u(\cdot), t_f) := t_f \rightarrow \min \\
+\dot{q}(t) = F(q(t)) + u(t) G(q(t)), \quad |u(t)| \leq 1, \quad t \in [0, t_f], \\
+q(0) = q_0, \\
+q(t_f) = q_f
+\end{cases}
+```
 
 ## Sujet
 
