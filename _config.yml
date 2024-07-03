@@ -7,9 +7,7 @@ theme: minima
 
 # Markdown settings
 markdown: kramdown  
-kramdown:
-  input: GFM  
-  syntax_highlighter: rouge  
+ 
 
 
 # Liquid tags for Julia code highlighting
