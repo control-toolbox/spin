@@ -1,5 +1,5 @@
 # Saturation pair of spins and MRI
-The problem we are trying to solve is the $P_{BS}$ problem, also known as the *time minimal saturation problem of a pair of spin-1/2 particles* (or bi-saturation problem), as described on page 18 of the paper [^1] . This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O:=(0,0)$. wahiya
+The problem we are trying to solve is the  \(P_{BS}\) problem, also known as the *time minimal saturation problem of a pair of spin-1/2 particles* (or bi-saturation problem), as described on page 18 of the paper [^1] . This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O:=(0,0)$. wahiya
 
 ```
 \begin{cases}
