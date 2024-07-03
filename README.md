@@ -5,6 +5,7 @@ Spin
 
 LJAD / McTAO, UniCA (Nice / Sophia)
 
+
 ## Sujet
 
 Dans le cadre du projet ct: control-toolbox [^1] on s'intéresse à la modélisation et à la résolution en langage Julia de problèmes de contrôle optimal quantique. On cherchera notamment à reproduire certains des résultats obtenus dans [^2] sur le contrôle de deux spins couplés par un champ magnétique (MRI).
