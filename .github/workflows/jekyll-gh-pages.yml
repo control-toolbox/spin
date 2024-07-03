@@ -41,7 +41,7 @@ jobs:
 
       # Weave the Markdown files
       - name: Weave Markdown
-        run: julia -e 'using Weave; weave("\spin\bisaturation.md", doctype="github")'  # Replace with your actual Markdown file path
+        run: julia -e 'using Weave; weave("spin/bisaturation.md", doctype="github")'  # Replace with your actual Markdown file path
 
       # Build with Jekyll
       - name: Setup Pages
