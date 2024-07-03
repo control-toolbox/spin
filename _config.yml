@@ -7,9 +7,13 @@ theme: minima
 
 # Markdown settings
 markdown: kramdown  
- 
-
 
 # Liquid tags for Julia code highlighting
 highlighter: rouge
 
+# Include MathJax
+kramdown:
+  math_engine: mathjax
+  mathjax:
+    # Specify the version of MathJax you want to use
+    version: '3.2.0'  # Example version, you can specify the version you need
