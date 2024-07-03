@@ -1,4 +1,4 @@
- # Sample workflow for building and deploying a Jekyll site to GitHub Pages
+# Sample workflow for building and deploying a Jekyll site to GitHub Pages
 name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
@@ -28,6 +28,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      # Set up Julia
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.10'  # Specify the version of Julia you need
+
+      # Install Weave
+      - name: Install Weave
+        run: julia -e 'using Pkg; Pkg.add("Weave")'
+
+      # Weave the Markdown files
+      - name: Weave Markdown
+        run: julia -e 'using Weave; weave("\spin\bisaturation.md", doctype="github")'  # Replace with your actual Markdown file path
+
+      # Build with Jekyll
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll
