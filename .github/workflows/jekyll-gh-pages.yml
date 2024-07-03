@@ -42,7 +42,6 @@ jobs:
       # Weave the Markdown files
       - name: Weave Markdown
         run: julia -e 'using Weave; weave("bisaturation.md", doctype="github", out_path="bisaturation_out.md")'
-           mv bisaturation_out.md _includes/
 
       # Build with Jekyll
       - name: Setup Pages
