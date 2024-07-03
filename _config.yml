@@ -3,7 +3,7 @@
 # Site settings
 title: Spin
 description: Your site description
-theme: jekyll-theme-minimal  
+theme: minima  
 
 # Markdown settings
 markdown: kramdown  
@@ -11,10 +11,6 @@ kramdown:
   input: GFM  
   syntax_highlighter: rouge  
 
-# Jekyll settings
-plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
 
 # Liquid tags for Julia code highlighting
 highlighter: rouge
