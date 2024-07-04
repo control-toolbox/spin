@@ -1,2 +1,7 @@
+name = "Spin"
+authors = ["Ibtissam Mimoun<ibtissam.mimoun@enseeiht.fr>",
+           "Jean-Baptiste Caillau <jean-baptiste.caillau@univ-cotedazur.fr>"]
+version = "0.1"
+
 [deps]
 OptimalControl = "5f98b655-cc9a-415a-b60e-744165666948"
