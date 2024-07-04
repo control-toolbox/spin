@@ -14,7 +14,7 @@ where $q_0=[0,1,0,1]$, $q_f=[0,0,0,0]$ and $F$ and $G$ are defined by equation 2
 
 We first define the problem.
 
-```@main
+```@example main
 using OptimalControl
 Γ = 9.855e-2
 γ = 3.65e-3
@@ -40,7 +40,7 @@ One effective approach involves homotopy on the initial condition. This method b
 The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from $[1, 0, 1, 0]$, advancing towards the desired initial condition of $[0, 1, 0, 1]$.
 
 Letus first define functions that define the optimal control problem with initial state x₀ and plot the solutions: 
-```julia
+```@example main
 # Define the optimal control problem with initial state x₀
 function g(x₀)
     @def ocp begin
