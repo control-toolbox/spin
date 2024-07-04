@@ -1,5 +1,5 @@
 using Documenter
-using DocumenterMermaid
+#using DocumenterMermaid
 using OptimalControl
 
 makedocs(;
