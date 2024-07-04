@@ -1,5 +1,4 @@
 using Documenter
-#using DocumenterMermaid
 using OptimalControl
 
 makedocs(;
@@ -7,6 +6,7 @@ makedocs(;
     sitename = "spin.jl",
     format = Documenter.HTML(prettyurls = false),
     pages = [
+        "Introduction" => "index.md",
         "Bisaturation" => "bisaturation.md",
     ],
     checkdocs=:none,
