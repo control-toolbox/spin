@@ -2,6 +2,7 @@
 
 `Spin.jl` is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
 
+# To be updated
 
 !!! note "Install"
 
