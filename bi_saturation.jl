@@ -171,6 +171,7 @@ ocpf = f(0.1)
 initial_g = solve(ocpu, grid_size=100)
 
 for i in 1:10
+    global initial_g
     solf = solve(ocpf, grid_size=i*100, init=initial_g)
     initial_g = solf
 end
