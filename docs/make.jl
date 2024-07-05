@@ -13,6 +13,6 @@ makedocs(;
 )
 
 deploydocs(
-    repo = "github.com/control-toolbox/spin.jl.git",
+    repo = "github.com/control-toolbox/spin.git",
     devbranch = "main"
 )

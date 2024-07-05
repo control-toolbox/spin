@@ -1,4 +1,5 @@
 name = "spin"
+uuid = "733b5546-3ae9-11ef-2523-8101814058f1" 
 authors = ["Ibtissam Mimoun<ibtissam.mimoun@enseeiht.fr>", "Jean-Baptiste Caillau <jean-baptiste.caillau@univ-cotedazur.fr>"]
 version = "0.1.0"
 
