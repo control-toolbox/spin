@@ -21,8 +21,9 @@ jobs:
       - uses: julia-actions/julia-buildpkg@latest
         #with:
         #  version: '1.10'
-      - name: Install dependencies
+      - name: Install registry
         run: julia -e 'using Pkg; Pkg.Registry.add("https://github.com/control-toolbox/ct-registry.git")'
+      - name: Install dependencies
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
         env:
