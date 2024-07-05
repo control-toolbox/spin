@@ -1,4 +1,2 @@
 [deps]
-OptimalControl = "5f98b655-cc9a-415a-b60e-744165666948"
-Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
