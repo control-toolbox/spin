@@ -1,6 +1,3 @@
-using Pkg # debug
-Pkg.Registry.add("https://github.com/control-toolbox/ct-registry.git")
-
 using Documenter
 using OptimalControl
 

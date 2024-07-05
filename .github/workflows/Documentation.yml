@@ -22,6 +22,7 @@ jobs:
         #with:
         #  version: '1.10'
       - name: Install dependencies
+        run: julia -e 'using Pkg; Pkg.Registry.add("https://github.com/control-toolbox/ct-registry.git")'
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Build and deploy
         env:
