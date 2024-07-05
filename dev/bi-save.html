@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Saturation pair of spins and MRI · spin</title><meta name="title" content="Saturation pair of spins and MRI · spin"/><meta property="og:title" content="Saturation pair of spins and MRI · spin"/><meta property="twitter:title" content="Saturation pair of spins and MRI · spin"/><meta name="description" content="Documentation for spin."/><meta property="og:description" content="Documentation for spin."/><meta property="twitter:description" content="Documentation for spin."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">spin</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Introduction</a></li><li><a class="tocitem" href="bisaturation.html">Bisaturation</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="bi-save.html">Saturation pair of spins and MRI</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="bi-save.html">Saturation pair of spins and MRI</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin/blob/main/docs/src/bi-save.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Saturation-pair-of-spins-and-MRI"><a class="docs-heading-anchor" href="#Saturation-pair-of-spins-and-MRI">Saturation pair of spins and MRI</a><a id="Saturation-pair-of-spins-and-MRI-1"></a><a class="docs-heading-anchor-permalink" href="#Saturation-pair-of-spins-and-MRI" title="Permalink"></a></h1><p>The problem we are trying to solve is the  <span>$P_{BS}$</span> problem, also known as the <em>time minimal saturation problem of a pair of spin-1/2 particles</em> (or bi-saturation problem), as described on page 18 of the paper <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup> . This model describes a pair of spins that share the same characteristics, specifically the same relaxation times <span>$T_1$</span> and <span>$T_2$</span>. However, the control field intensity differs for each spin due to variations as they transition from the North Pole <span>$N := (0,1)$</span> to the origin <span>$O:=(0,0)$</span>.</p><p class="math-container">\[\begin{cases}
+J(u(\cdot), t_f) := t_f \rightarrow \min \\
+\dot{q}(t) = F(q(t)) + u(t) G(q(t)), \quad |u(t)| \leq 1, \quad t \in [0, t_f], \\
+q(0) = q_0, \\
+q(t_f) = q_f
+\end{cases}\]</p><p>where <span>$q_0=[0,1,0,1]$</span>, <span>$q_f=[0,0,0,0]$</span> and <span>$F$</span> and <span>$G$</span> are defined by equation 2 on page 5, as well as in sections 2.1 and 3.1. We use the control-toolbox functions to find both local and global solutions.</p><p>We first define the problem.</p><pre><code class="language-julia hljs">using OptimalControl
+Γ = 9.855e-2
+γ = 3.65e-3
+ϵ₀ = 0.1
+@def ocp begin
+    tf ∈ R, variable
+    t ∈ [ 0, tf ], time
+    x ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    x(0) == [0, 1, 0, 1 ]
+    x(tf) == [0, 0, 0, 0]
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), (γ*(1-x₂(t)) +u(t)*x₁(t)), (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)), (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+    tf → min
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+<span class="sgr1">The (autonomous) optimal control problem is given by:</span>
+
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    x ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    x(0) == [0, 1, 0, 1]
+    x(tf) == [0, 0, 0, 0]
+    ẋ(t) == [-Γ * x₁(t) - u(t) * x₂(t), γ * (1 - x₂(t)) + u(t) * x₁(t), -Γ * x₃(t) - (1 - ϵ₀) * u(t) * x₄(t), γ * (1 - x₄(t)) + (1 - ϵ₀) * u(t) * x₃(t)]
+    tf → min
+
+<span class="sgr1">The (autonomous) optimal control problem is of the form:</span>
+
+<span class="sgr34">    minimize  </span>J(x, u, tf) = g(x(0), x(tf), tf)
+
+<span class="sgr34">    subject to</span>
+
+        ẋ(t) = f(x(t), u(t), tf), t in [0, tf] a.e.,
+
+        ηl ≤ η(x(t), tf) ≤ ηu, 
+        ϕl ≤ ϕ(x(0), x(tf), tf) ≤ ϕu, 
+
+    where x(t) ∈ R⁴, u(t) ∈ R and tf ∈ R.
+
+<span class="sgr1">Declarations </span>(* required):
+</code></pre><p>However, we quickly realize that solving this problem without any prior initial guesses is not feasible. This realization prompts us to explore potential solutions that facilitate problem-solving.</p><p>One effective approach involves homotopy on the initial condition. This method begins from an initial point where the problem can be resolved without requiring any initial guesses. Subsequently, we generate a sequence of initial guesses by solving intermediate problems created through homotopy, gradually progressing towards our original initial condition : <span>$[0, 1, 0, 1]$</span>. Using <span>$[1, 0, 1, 0]$</span> as our initial guess revealed that it can serve as the starting point for this homotopy process.</p><h2 id="Homotopy-on-the-initial-condition:"><a class="docs-heading-anchor" href="#Homotopy-on-the-initial-condition:">Homotopy on the initial condition:</a><a id="Homotopy-on-the-initial-condition:-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-the-initial-condition:" title="Permalink"></a></h2><p>The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from <span>$[1, 0, 1, 0]$</span>, advancing towards the desired initial condition of <span>$[0, 1, 0, 1]$</span>.</p><p>Letus first define functions that define the optimal control problem with initial state x₀ and plot the solutions: </p><pre><code class="language-julia hljs"># Define the optimal control problem with initial state x₀
+function g(x₀)
+    @def ocp begin
+        tf ∈ R, variable
+        t ∈ [0, tf], time
+        x ∈ R⁴, state
+        u ∈ R, control
+        tf ≥ 0
+        -1 ≤ u(t) ≤ 1
+        x(0) == x₀
+        x(tf) == [0, 0, 0, 0]
+        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)),
+                (γ*(1-x₂(t)) +u(t)*x₁(t)),
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+        tf → min
+    end
+    return ocp
+end
+    # Function to plot the solution of the optimal control problem
+function plot_sol(sol)
+    q = sol.state
+    liste = [q(t) for t in sol.times]
+    liste_y1 = [elt[1] for elt in liste]
+    liste_z1 = [elt[2] for elt in liste]
+    liste_y2 = [elt[3] for elt in liste]
+    liste_z2 = [elt[4] for elt in liste]
+    plot(
+        plot(liste_y1, liste_z1, xlabel=&quot;y1&quot;, ylabel=&quot;z1&quot;),
+        plot(liste_y2, liste_z2, xlabel=&quot;y2&quot;, ylabel=&quot;z2&quot;),
+        plot(sol.times, sol.control, xlabel=&quot;Time&quot;, ylabel=&quot;Control&quot;)
+    )
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_sol (generic function with 1 method)</code></pre><p>Then we perform homotopy on the initial condition with a step of 0.1,</p><pre><code class="language-julia hljs">ocp_x = g([1, 0, 1, 0])
+sol_x = solve(ocp_x, grid_size=100)
+sol_x.variable
+L_x = [sol_x]
+for i in 1:10
+    x₀ = i / 10 * [0, 1, 0, 1] + (1 - i / 10) * [1, 0, 1, 0]
+    ocpi_x = g(x₀)
+    sol_i_x = solve(ocpi_x, grid_size=100, display=false, init=L_x[end]) 
+    push!(L_x, sol_i_x)
+end
+nothing # hide</code></pre><p>and plot the solutions.</p><pre><code class="language-julia hljs">solution_x = L_x[end]
+solution_x.variable
+plot_sol(solution_x)</code></pre><p>Conclusion: The solution is considered local, as the final time exceeds the one found using the Bocop software as mentioned in <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>. Now, let&#39;s approach solving this problem differently. One potential initial guess could be obtained by solving a monosaturation problem where the control field intensity is the same for both spins, i.e., <span>$ϵ = 0$</span>, and then using homotopy to transition to <span>$ϵ = 0.1$</span>. We start by solving the problem for a single spin and then extend this approach to two identical spins before applying homotopy.</p><h2 id="Homotopy-on-ϵ-:"><a class="docs-heading-anchor" href="#Homotopy-on-ϵ-:">Homotopy on ϵ :</a><a id="Homotopy-on-ϵ-:-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-ϵ-:" title="Permalink"></a></h2><h3 id="Monosaturation-problem-:"><a class="docs-heading-anchor" href="#Monosaturation-problem-:">Monosaturation problem :</a><a id="Monosaturation-problem-:-1"></a><a class="docs-heading-anchor-permalink" href="#Monosaturation-problem-:" title="Permalink"></a></h3><pre><code class="language-julia hljs">@def ocp begin
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    q = (y, z) ∈ R², state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    q(0) == [0, 1] # North pole
+    q(tf) == [0, 0] # Center
+    q̇(t) == [(-Γ * y(t) - u(t) * z(t)),( γ * (1 - z(t)) + u(t) * y(t))]
+    tf → min
+end
+N = 100
+sol = solve(ocp, grid_size=N) 
+# Extracting the control, final time and then duplicating the state to be able to have an initial guess for the two spins.
+u_init = sol.control  
+q_init(t) = [sol.state(t); sol.state(t)]
+tf_init = sol.variable</code></pre><h3 id="Bi-saturation-problem-:"><a class="docs-heading-anchor" href="#Bi-saturation-problem-:">Bi-saturation problem :</a><a id="Bi-saturation-problem-:-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-saturation-problem-:" title="Permalink"></a></h3><pre><code class="language-julia hljs">@def ocp2 begin
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    q(0) == [0, 1, 0, 1] 
+    q(tf) == [0, 0, 0, 0] 
+    q̇(t) == [-Γ * y₁(t) - u(t) * z₁(t),
+            γ * (1 - z₁(t)) + u(t) * y₁(t),
+            -Γ * y₂(t) - u(t) * z₂(t),
+            γ * (1 - z₂(t)) + u(t) * y₂(t)]
+    tf → min
+end
+
+init = (state=q_init, control=u_init, variable=tf_init)
+sol2 = solve(ocp2; grid_size=N, init=init)</code></pre><p>Homotopy on ϵ to find a potential solution :  We define the function below that computes the problem depending on <span>$ϵ$</span>: </p><pre><code class="language-julia hljs"># Define the optimal control problem with parameter ϵ₀
+function f(ϵ₀)
+    @def ocp begin
+        tf ∈ R, variable 
+        t ∈ [0, tf], time 
+        x ∈ R⁴, state    
+        u ∈ R, control    
+        tf ≥ 0            
+        -1 ≤ u(t) ≤ 1     
+        x(0) == [0, 1, 0, 1] 
+        x(tf) == [0, 0, 0, 0] 
+        
+        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+        tf → min 
+    end
+    return ocp
+end</code></pre><pre><code class="language-julia hljs">ϵ = 0
+initial_guess = sol2
+L = [sol2]
+for i in 1:10
+    global ϵ = ϵ + 0.01
+    global initial_guess
+    ocpi = f(ϵ)
+    sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
+    global L
+    push!(L, sol_i)
+    initial_guess = sol_i
+end
+sol_eps = L[end]
+sol_eps.variable
+plot_sol(sol_eps)</code></pre><p>Conclusion: The solution is a local one.</p><p>Another approach involves defining a bi-saturation problem with a slightly adjusted initial condition: <span>$q₀ = [0.1, 0.9, 0.1, 0.9]$</span>.</p><h2 id="Bi-Saturation-Problem:-Initial-Guess-from-a-Slightly-Different-Problem"><a class="docs-heading-anchor" href="#Bi-Saturation-Problem:-Initial-Guess-from-a-Slightly-Different-Problem">Bi-Saturation Problem: Initial Guess from a Slightly Different Problem</a><a id="Bi-Saturation-Problem:-Initial-Guess-from-a-Slightly-Different-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-Saturation-Problem:-Initial-Guess-from-a-Slightly-Different-Problem" title="Permalink"></a></h2><pre><code class="language-julia hljs">@def ocpu begin
+tf ∈ R, variable
+t ∈ [0, tf], time
+x ∈ R⁴, state
+u ∈ R, control
+tf ≥ 0
+-1 ≤ u(t) ≤ 1
+x(0) == [0.1, 0.9, 0.1, 0.9] # Initial condition
+x(tf) == [0, 0, 0, 0] # Terminal condition
+ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
+          (γ*(1-x₂(t)) +u(t)*x₁(t)),
+          (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)),
+          (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+tf → min
+end
+initial_g = solve(ocpu, grid_size=100)
+ϵ₀ = 0.1
+ocpf = f(ϵ₀)
+for i in 1:10
+    solf = solve(ocpf, grid_size=i*100, init=initial_g)
+    initial_g = solf
+end
+# Plot the figures
+plot_sol(initial_g)
+# Conclusion: This solution seems to be the optimal one.</code></pre><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Friday 5 July 2024 16:53">Friday 5 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
