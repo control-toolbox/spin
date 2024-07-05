@@ -1,8 +1,6 @@
-# Spin.jl
+# spin
 
-`Spin.jl` is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
-
-# To be updated
+`spin` is part of the [control-toolbox ecosystem](https://github.com/control-toolbox).
 
 !!! note "Install"
 
