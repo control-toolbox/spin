@@ -1,3 +1,6 @@
+using Pkg
+Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/control-toolbox/ct-registry.git"))
+
 using OptimalControl
 using Test
 
