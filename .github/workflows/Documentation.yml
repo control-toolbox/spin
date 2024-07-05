@@ -14,10 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest
-      - uses: julia-actions/add-julia-registry@latest
-        with:
-          key: ${{ secrets.SSH_KEY }}
-          registry: control-toolbox/ct-registry
+      #- uses: julia-actions/add-julia-registry@latest
+      #  with:
+      #    key: ${{ secrets.SSH_KEY }}
+      #    registry: control-toolbox/ct-registry
       - uses: julia-actions/julia-buildpkg@latest
         #with:
         #  version: '1.10'
