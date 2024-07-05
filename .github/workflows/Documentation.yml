@@ -19,7 +19,7 @@ jobs:
       #    key: ${{ secrets.SSH_KEY }}
       #    registry: control-toolbox/ct-registry
       - name: Install registry
-        run: julia -e 'using Pkg; pkg"registry add https://github.com/control-toolbox/ct-registry.git"'
+        run: julia -e 'using Pkg; Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/control-toolbox/ct-registry.git"))' 
       - uses: julia-actions/julia-buildpkg@latest
         #with:
         #  version: '1.10'
