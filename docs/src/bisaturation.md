@@ -15,6 +15,8 @@ where $q_0=[0,1,0,1]$, $q_f=[0,0,0,0]$ and $F$ and $G$ are defined by equation 2
 We first define the problem.
 
 ```@example main
+using Pkg # hide
+Pkg.add("OptimalControl") # hide
 using OptimalControl
 Γ = 9.855e-2
 γ = 3.65e-3
