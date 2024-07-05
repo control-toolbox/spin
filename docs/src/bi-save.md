@@ -1,19 +1,20 @@
 # Saturation pair of spins and MRI
 The problem we are trying to solve is the  $P_{BS}$ problem, also known as the *time minimal saturation problem of a pair of spin-1/2 particles* (or bi-saturation problem), as described on page 18 of the paper [^1] . This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O:=(0,0)$.
-$$
+
+```math
 \begin{cases}
 J(u(\cdot), t_f) := t_f \rightarrow \min \\
 \dot{q}(t) = F(q(t)) + u(t) G(q(t)), \quad |u(t)| \leq 1, \quad t \in [0, t_f], \\
 q(0) = q_0, \\
 q(t_f) = q_f
 \end{cases}
-$$
+```
 
 where $q_0=[0,1,0,1]$, $q_f=[0,0,0,0]$ and $F$ and $G$ are defined by equation 2 on page 5, as well as in sections 2.1 and 3.1. We use the control-toolbox functions to find both local and global solutions.
 
 We first define the problem.
 
-```julia
+```@example main
 using OptimalControl
 Γ = 9.855e-2
 γ = 3.65e-3
@@ -38,8 +39,8 @@ One effective approach involves homotopy on the initial condition. This method b
 ## Homotopy on the initial condition:
 The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from $[1, 0, 1, 0]$, advancing towards the desired initial condition of $[0, 1, 0, 1]$.
 
-Let's first define functions that define the optimal control problem with initial state x₀ and plot the solutions: 
-```julia
+Letus first define functions that define the optimal control problem with initial state x₀ and plot the solutions: 
+```@example main
 # Define the optimal control problem with initial state x₀
 function g(x₀)
     @def ocp begin
@@ -217,7 +218,5 @@ plot_sol(initial_g)
 # Conclusion: This solution seems to be the optimal one.
 ```
 
-## Resources :
+## References
 [^1]: Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.
-
-
