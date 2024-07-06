@@ -23,6 +23,7 @@ using Plots
 Γ = 9.855e-2
 γ = 3.65e-3
 ϵ = 0.1
+
 @def ocp begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
