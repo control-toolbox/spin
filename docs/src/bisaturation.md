@@ -19,7 +19,7 @@ We first define the problem.
 using OptimalControl
 Γ = 9.855e-2
 γ = 3.65e-3
-ϵ₀ = 0.1
+ϵ = 0.1
 @def ocp begin
     tf ∈ R, variable
     t ∈ [ 0, tf ], time
@@ -29,7 +29,7 @@ using OptimalControl
     -1 ≤ u(t) ≤ 1
     x(0) == [0, 1, 0, 1 ]
     x(tf) == [0, 0, 0, 0]
-    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), (γ*(1-x₂(t)) +u(t)*x₁(t)), (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)), (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), (γ*(1-x₂(t)) +u(t)*x₁(t)), (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
     tf → min
 end
 ```
@@ -103,7 +103,7 @@ plot_sol(solution_x)
 ```
 
 Conclusion: The solution is considered local, as the final time exceeds the one found using the Bocop software as mentioned in [^1].
-Let us now solve this problem differently. One potential initial guess could be obtained by solving a monosaturation problem where the control field intensity is the same for both spins, i.e., $ϵ = 0$, and then using homotopy to transition to $ϵ = 0.1$. We start by solving the problem for a single spin and then extend this approach to two identical spins before applying homotopy.
+Let us now solve this problem differently. One potential initial guess could be obtained by solving a monosaturation problem where the control field intensity is the same for both spins, *i.e.*, $ϵ = 0$, and then using homotopy to transition to $ϵ = 0.1$. We start by solving the problem for a single spin and then extend this approach to two identical spins before applying homotopy.
 
 ## Homotopy on ϵ
 
@@ -160,8 +160,8 @@ sol2 = solve(ocp2; grid_size=N, init=init)
 We define the function below that computes the problem depending on $\varepsilon$: 
 
 ```@example main
-# Define the optimal control problem with parameter ϵ₀
-function f(ϵ₀)
+# Define the optimal control problem with parameter ϵ
+function f(ϵ)
     @def ocp begin
         tf ∈ R, variable 
         t ∈ [0, tf], time 
@@ -174,8 +174,8 @@ function f(ϵ₀)
         
         ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
                 (γ*(1-x₂(t)) +u(t)*x₁(t)), 
-                (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)), 
-                (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
         tf → min 
     end
     return ocp
@@ -204,6 +204,8 @@ Another approach involves defining a bi-saturation problem with a slightly adjus
 
 ##  Bi-Saturation Problem: initial Guess from a Slightly Different Problem
 ```@example main
+ϵ = 0.1
+
 @def ocpu begin
 tf ∈ R, variable
 t ∈ [0, tf], time
@@ -215,13 +217,12 @@ x(0) == [0.1, 0.9, 0.1, 0.9] # Initial condition
 x(tf) == [0, 0, 0, 0] # Terminal condition
 ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
           (γ*(1-x₂(t)) +u(t)*x₁(t)),
-          (-Γ*x₃(t) -(1-ϵ₀)* u(t)*x₄(t)),
-          (γ*(1-x₄(t)) +(1-ϵ₀)*u(t)*x₃(t))]
+          (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
+          (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
           tf → min
 end
 initial_g = solve(ocpu, grid_size=100)
-ϵ₀ = 0.1
-ocpf = f(ϵ₀)
+ocpf = f(ϵ)
 for i in 1:10
     solf = solve(ocpf, grid_size=i*100, init=initial_g)
     initial_g = solf
