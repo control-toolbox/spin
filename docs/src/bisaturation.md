@@ -1,6 +1,6 @@
-# Saturation pair of spins
+# Saturation of pair of spins
 
-The problem we are trying to solve is the time minimal saturation of a pair of spin-$1/2$ particles (or bi-saturation problem), as described aper in [^1]. This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O:=(0,0)$:
+The problem we are trying to solve is the time minimal saturation of a pair of spin-$1/2$ particles (or bi-saturation problem), as described in [^1]. This model describes a pair of spins that share the same characteristics, specifically the same relaxation times $T_1$ and $T_2$. However, the control field intensity differs for each spin due to variations as they transition from the North Pole $N := (0,1)$ to the origin $O:=(0,0)$:
 
 ```math
 \begin{cases}
@@ -11,7 +11,7 @@ q(t_f) = q_f
 \end{cases}
 ```
 
-where $q_0=[0,1,0,1]$, $q_f=[0,0,0,0]$ and $F$ and $G$ are defined by equation 2 on page 5, as well as in sections 2.1 and 3.1. We use the control-toolbox functions to find both local and global solutions.
+where $q_0=[0,1,0,1]$, $q_f=[0,0,0,0]$ and $F$ and $G$ are defined by (2) on page 5, as well as in sections 2.1 and 3.1.
 
 We first define the problem.
 
@@ -224,6 +224,7 @@ end
 initial_g = solve(ocpu, grid_size=100)
 ocpf = f(ϵ)
 for i in 1:10
+    global initial_g
     solf = solve(ocpf, grid_size=i*100, init=initial_g)
     initial_g = solf
 end
