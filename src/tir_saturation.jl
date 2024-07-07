@@ -1,6 +1,9 @@
 using OptimalControl
+using NLPModelsIpopt
 using Plots
-include("bi_saturation.jl")
+
+#include("bi_saturation.jl")
+
 # Define the parameters of the problem
 Γ = 9.855e-2  
 γ = 3.65e-3  

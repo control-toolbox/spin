@@ -1,4 +1,5 @@
 using OptimalControl
+using NLPModelsIpopt
 using Plots
 
 # Define the parameters of the problem
