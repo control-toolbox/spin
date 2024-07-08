@@ -4,17 +4,15 @@ using Plots
 
 include("bsat.jl")
 
-# Define the parameters of the problem
-Γ = 9.855e-2  
-γ = 3.65e-3  
-ϵ =0.1
+ϵ = 0.1
+q0 = [0, 1, 0, 1]
+
 function F0i(q)
     y, z = q
     res = [-Γ*y, γ*(1-z)]
     return res
 end
 
-# idem for F1
 function F1i(q)
     y, z = q
     res = [-z, y]
@@ -48,18 +46,17 @@ u = initial_g.control
 p = initial_g.costate
 φ(t) = H1(q(t), p(t))
 uₘ = 1
-H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
+H1_plot = plot(t, φ; label = "H₁(x(t), p(t))")
 
 function shoot!(s, p0, tf , t1, t2, t3)
-    q0 = [0, 1, 0, 1]
-    f0 = Flow(ocp_t, (q, p, tf) -> uₘ)
-    f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
+    fp = Flow(ocp_t, (q, p, tf) -> uₘ)
+    fm = Flow(ocp_t, (q, p, tf) -> -uₘ)
     fs = Flow(ocp_t, (q, p, tf) -> us(q, p))
     q1, p1 = f1(0, q0, p0, t1)
     q2, p2 = fs(t1, q1, p1, t2)
     p3, q3 = f0(t2, q2, p2, t3)
     qf, pf = fs(t3, q3, p3, tf)
-    s[1] = -uₘ*H1(q0, p0) -1 
+    s[1] = -uₘ * H1(q0, p0) -1 
     s[2] = H1(q1, p1)
     s[3] = H01(q1, p1)
     s[4] = H1(q3, p3)
@@ -88,7 +85,6 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2+0.1]
 t3 = min(t3f...)
 p0 = p(t0)
-q0 = [0, 1, 0, 1]
 tf = initial_g.variable
 using DifferentialEquations
 f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
