@@ -47,28 +47,28 @@ q = initial_g.state
 u = initial_g.control
 p = initial_g.costate
 φ(t) = H1(q(t), p(t))
-uₘ = 1
+uₘₐₓ = 1
 H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 
 function shoot!(s, p0, tf , t1, t2, t3)
     q0 = [0, 1, 0, 1]
-    f0 = Flow(ocp_t, (q, p, tf) -> uₘ)
-    f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
+    fₚ = Flow(ocp_t, (q, p, tf) -> uₘₐₓ)
+    fₘ = Flow(ocp_t, (q, p, tf) -> - uₘₐₓ)
     fs = Flow(ocp_t, (q, p, tf) -> us(q, p))
-    q1, p1 = f1(0, q0, p0, t1)
+    q1, p1 = fₘ(0, q0, p0, t1)
     q2, p2 = fs(t1, q1, p1, t2)
-    p3, q3 = f0(t2, q2, p2, t3)
+    p3, q3 = fₚ(t2, q2, p2, t3)
     qf, pf = fs(t3, q3, p3, tf)
-    s[1] = -uₘ*H1(q0, p0) -1 
+    s[1] = H0(q0, p0) - uₘₐₓ * H1(q0, p0) - 1  
     s[2] = H1(q1, p1)
     s[3] = H01(q1, p1)
     s[4] = H1(q3, p3)
     s[5] = H01(q3, p3)
-    s[6] = q(t3)[3]
-    s[7] = q(t3)[4]
-    s[8] = (pf[2] + pf[4])*γ -1
+    s[6] = qf[3]
+    s[7] = qf[4]
+    s[8] = (pf[2] + pf[4]) * γ - 1
 end
-t0 =0
+t0 = 0
 tol = 0.01
 t13 = [ elt for elt in t if abs(φ(elt)) < tol]
 i = 1
