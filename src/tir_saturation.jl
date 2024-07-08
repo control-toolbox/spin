@@ -50,8 +50,7 @@ p = initial_g.costate
 uₘ = 1
 H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 
-function shoot(p0, tf , t1, t2, t3)
-    s = zeros(eltype(p0), 8)
+function shoot!(s, p0, tf , t1, t2, t3)
     q0 = [0, 1, 0, 1]
     f0 = Flow(ocp_t, (q, p, tf) -> uₘ)
     f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
@@ -68,7 +67,6 @@ function shoot(p0, tf , t1, t2, t3)
     s[6] = q(t3)[3]
     s[7] = q(t3)[4]
     s[8] = (pf[2] + pf[4])*γ -1
-    return s
 end
 t0 =0
 tol = 0.01
@@ -95,4 +93,17 @@ tf = initial_g.variable
 using DifferentialEquations
 f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
 qi1, pi1 = f1(0, q0, p0, t1)
-shoot(p0, tf, t1, t2, t3)
+println("p0 = ", p0)
+println("t1 = ", t1)
+println("t2 = ", t2)
+println("t3 = ", t3)
+println("tf = ", tf)
+using LinearAlgebra: norm
+s = similar(p0, 8)
+shoot!(s, p0, tf, t1, t2, t3)
+nle = (s, ξ, λ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])   # auxiliary function
+                                                               # with aggregated inputs
+ξ = [ p0 ; tf ; t1 ; t2 ; t3 ]                                 # initial guess
+
+prob = NonlinearProblem(nle, ξ)
+indirect_sol = NonlinearSolve.solve(prob) 
