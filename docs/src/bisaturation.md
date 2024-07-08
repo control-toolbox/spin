@@ -47,10 +47,12 @@ function ocp1(q₀)
         t ∈ [0, tf], time
         q = (y, z) ∈ R², state
         u ∈ R, control
+        tf ≥ 0
         -1 ≤ u(t) ≤ 1
         q(0) == q₀
         q(tf) == [0, 0]
         q̇(t) == F0(q(t)) + u(t) * F1(q(t))
+        tf → min
     end
     return o
 end
@@ -62,6 +64,7 @@ function ocp2(q₁₀, q₂₀, ε)
         t ∈ [0, tf], time
         q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
         u ∈ R, control
+        tf ≥ 0
         -1 ≤ u(t) ≤ 1
         qᵢ₁ = [y₁, z₁]
         qᵢ₂ = [y₂, z₂]
@@ -70,6 +73,7 @@ function ocp2(q₁₀, q₂₀, ε)
         qᵢ₁(tf) == [0, 0]
         qᵢ₂(tf) == [0, 0]
         q̇(t) == F0(qᵢ₁(t), qᵢ₂(t)) + u(t) * F1(qᵢ₁(t), qᵢ₂(t), ε)
+        tf → min
     end
     return o
 end
