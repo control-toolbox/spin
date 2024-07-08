@@ -12,71 +12,78 @@ using Plots
 γ = 3.65e-3
 ϵ = 0.1
 
-@def ocp begin
-    tf ∈ R, variable
-    t ∈ [ 0, tf ], time
-    x ∈ R⁴, state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    x(0) == [0, 1, 0, 1 ]
-    x(tf) == [0, 0, 0, 0]
-    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), (γ*(1-x₂(t)) +u(t)*x₁(t)), (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-    tf → min
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
+function F0(q)
+    y, z = q
+    res = [-Γ*y, γ*(1-z)]
+    return res
+end
+
+# idem for F1
+function F1(q)
+    y, z = q
+    res = [-z, y]
+    return res
+end
+
+F0(q₁, q₂) = [ F0(q₁); F0(q₂) ]
+F1(q₁, q₂, ε) = [ F1(q₁); (1 - ε) * F1(q₂) ]
+
+# Define the optimal control problem with initial state q₀ in the case of one spin
+function ocp1(q₀)
+    @def o begin
+        tf ∈ R, variable
+        t ∈ [0, tf], time
+        q = (y, z) ∈ R², state
+        u ∈ R, control
+        -1 ≤ u(t) ≤ 1
+        q(0) == q₀
+        q(tf) == [0, 0]
+        q̇(t) == F0(q(t)) + u(t) * F1(q(t))
+    end
+    return o
+end
+
+# Define the optimal control problem with initial state q₀ in the case of two spins
+function ocp2(q₁₀, q₂₀, ε)
+    @def o begin
+        tf ∈ R, variable
+        t ∈ [0, tf], time
+        q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
+        u ∈ R, control
+        -1 ≤ u(t) ≤ 1
+        qᵢ₁ = [y₁, z₁]
+        qᵢ₂ = [y₂, z₂]
+        qᵢ₁(0) == q₁₀
+        qᵢ₂(0) == q₂₀
+        qᵢ₁(tf) == [0, 0]
+        qᵢ₂(tf) == [0, 0]
+        q̇(t) == F0(qᵢ₁(t), qᵢ₂(t)) + u(t) * F1(qᵢ₁(t), qᵢ₂(t), ε)
+    end
+    return o
+end
+prob = ocp2([0,1], [0,1], ϵ)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">
 <span class="sgr1">The (autonomous) optimal control problem is given by:</span>
 
     tf ∈ R, variable
     t ∈ [0, tf], time
-    x ∈ R⁴, state
+    q = ((y₁, z₁, y₂, z₂) ∈ R⁴, state)
     u ∈ R, control
-    tf ≥ 0
     -1 ≤ u(t) ≤ 1
-    x(0) == [0, 1, 0, 1]
-    x(tf) == [0, 0, 0, 0]
-    ẋ(t) == [-Γ * x₁(t) - u(t) * x₂(t), γ * (1 - x₂(t)) + u(t) * x₁(t), -Γ * x₃(t) - (1 - ϵ) * u(t) * x₄(t), γ * (1 - x₄(t)) + (1 - ϵ) * u(t) * x₃(t)]
-    tf → min
-
-<span class="sgr1">The (autonomous) optimal control problem is of the form:</span>
-
-<span class="sgr34">    minimize  </span>J(x, u, tf) = g(x(0), x(tf), tf)
-
-<span class="sgr34">    subject to</span>
-
-        ẋ(t) = f(x(t), u(t), tf), t in [0, tf] a.e.,
-
-        ηl ≤ η(x(t), tf) ≤ ηu, 
-        ϕl ≤ ϕ(x(0), x(tf), tf) ≤ ϕu, 
-
-    where x(t) ∈ R⁴, u(t) ∈ R and tf ∈ R.
+    qᵢ₁ = [y₁, z₁]
+    qᵢ₂ = [y₂, z₂]
+    qᵢ₁(0) == q₁₀
+    qᵢ₂(0) == q₂₀
+    qᵢ₁(tf) == [0, 0]
+    qᵢ₂(tf) == [0, 0]
+    q̇(t) == F0(qᵢ₁(t), qᵢ₂(t)) + u(t) * F1(qᵢ₁(t), qᵢ₂(t), ε)
 
 <span class="sgr1">Declarations </span>(* required):
 ╭────────┬────────┬──────────┬──────────┬───────────┬────────────┬─────────────╮
 │<span class="sgr33"> times* │ state* │ control* │ variable │ dynamics* │ objective* │ constraints │
 ├────────┼────────┼──────────┼──────────┼───────────┼────────────┼─────────────┤
-│</span><span class="sgr32"><span class="sgr1">   V    │   V    │    V     │    V     │     V     │     V      │      V      │
+│</span><span class="sgr32"><span class="sgr1">   V    │   V    │    V     │    V     │     V     │</span></span><span class="sgr1"><span class="sgr31">     X      │</span><span class="sgr32">      V      │
 ╰────────┴────────┴──────────┴──────────┴───────────┴────────────┴─────────────╯
-</span></span></code></pre><p>However, we quickly realize that solving this problem without any prior initial guesses is not feasible. This realization prompts us to explore potential solutions that facilitate problem-solving.</p><p>One effective approach involves homotopy on the initial condition. This method begins from an initial point where the problem can be resolved without requiring any initial guesses. Subsequently, we generate a sequence of initial guesses by solving intermediate problems created through homotopy, gradually progressing towards our original initial condition: <span>$[0, 1, 0, 1]$</span>. Using <span>$[1, 0, 1, 0]$</span> as our initial guess revealed that it can serve as the starting point for this homotopy process.</p><h2 id="Homotopy-on-the-initial-condition"><a class="docs-heading-anchor" href="#Homotopy-on-the-initial-condition">Homotopy on the initial condition</a><a id="Homotopy-on-the-initial-condition-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-the-initial-condition" title="Permalink"></a></h2><p>The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from <span>$[1, 0, 1, 0]$</span>, advancing towards the desired initial condition of <span>$[0, 1, 0, 1]$</span>.</p><p>Letus first define functions that define the optimal control problem with initial state x₀ and plot the solutions: </p><pre><code class="language-julia hljs"># Define the optimal control problem with initial state x₀
-function g(x₀)
-    @def ocp begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        x ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        x(0) == x₀
-        x(tf) == [0, 0, 0, 0]
-        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)),
-                (γ*(1-x₂(t)) +u(t)*x₁(t)),
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-        tf → min
-    end
-    return ocp
-end
-
-function plot_sol(sol)
+</span></span></code></pre><p>However, we quickly realize that solving this problem without any prior initial guesses is not feasible. This realization prompts us to explore potential solutions that facilitate problem-solving.</p><p>One effective approach involves homotopy on the initial condition. This method begins from an initial point where the problem can be resolved without requiring any initial guesses. Subsequently, we generate a sequence of initial guesses by solving intermediate problems created through homotopy, gradually progressing towards our original initial condition: <span>$[0, 1, 0, 1]$</span>. Using <span>$[1, 0, 1, 0]$</span> as our initial guess revealed that it can serve as the starting point for this homotopy process.</p><h2 id="Homotopy-on-the-initial-condition"><a class="docs-heading-anchor" href="#Homotopy-on-the-initial-condition">Homotopy on the initial condition</a><a id="Homotopy-on-the-initial-condition-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-the-initial-condition" title="Permalink"></a></h2><p>The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from <span>$[1, 0, 1, 0]$</span>, advancing towards the desired initial condition of <span>$[0, 1, 0, 1]$</span>.</p><pre><code class="language-julia hljs">function plot_sol(sol)
     q = sol.state
     liste = [q(t) for t in sol.times]
     liste_y1 = [elt[1] for elt in liste]
@@ -88,13 +95,14 @@ function plot_sol(sol)
         plot(liste_y2, liste_z2, xlabel=&quot;y2&quot;, ylabel=&quot;z2&quot;),
         plot(sol.times, sol.control, xlabel=&quot;Time&quot;, ylabel=&quot;Control&quot;)
     )
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_sol (generic function with 1 method)</code></pre><p>Then we perform homotopy on the initial condition with a step of 0.1,</p><pre><code class="language-julia hljs">ocp_x = g([1, 0, 1, 0])
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_sol (generic function with 1 method)</code></pre><p>Then we perform homotopy on the initial condition with a step of 0.1,</p><pre><code class="language-julia hljs">q₀₁ = [1, 0]
+ocp_x = ocp2(q₀₁, q₀₁, ϵ)
 sol_x = solve(ocp_x, grid_size=100)
 sol_x.variable
 L_x = [sol_x]
 for i in 1:10
     x₀ = i / 10 * [0, 1, 0, 1] + (1 - i / 10) * [1, 0, 1, 0]
-    ocpi_x = g(x₀)
+    ocpi_x = ocp2(x₀[1:2], x₀[3:4], ϵ)
     sol_i_x = solve(ocpi_x, grid_size=100, display=false, init=L_x[end])
     push!(L_x, sol_i_x)
 end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Method = (:direct, :adnlp, :ipopt)
@@ -105,7 +113,7 @@ Number of nonzeros in inequality constraint Jacobian.:        0
 Number of nonzeros in Lagrangian Hessian.............:      909
 
 Total number of variables............................:      506
-                     variables with only lower bounds:        1
+                     variables with only lower bounds:        0
                 variables with lower and upper bounds:      101
                      variables with only upper bounds:        0
 Total number of equality constraints.................:      408
@@ -115,221 +123,88 @@ Total number of inequality constraints...............:        0
         inequality constraints with only upper bounds:        0
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   0  1.0000000e-01 9.00e-01 0.00e+00   0.0 0.00e+00    -  0.00e+00 0.00e+00   0
-   1  2.0978622e-01 8.99e-01 3.66e+01  -6.0 1.43e+02    -  8.59e-04 9.54e-04h  4
-   2r 2.0978622e-01 8.99e-01 9.99e+02  -0.0 0.00e+00    -  0.00e+00 2.04e-07R  2
-   3r 4.3121273e-01 8.94e-01 9.85e+02  -0.2 1.62e+01    -  9.91e-01 1.36e-02f  1
-   4r 4.4884748e-01 7.48e-01 9.91e+02   1.5 1.48e+02    -  5.84e-01 9.85e-04f  1
-   5  4.6606027e-01 7.48e-01 2.80e+03  -6.3 2.18e+03    -  4.40e-04 2.35e-04h  2
-   6  4.6932365e-01 7.48e-01 2.74e+03   1.7 5.58e+03    -  1.38e-04 4.37e-05h  3
-   7r 4.6932365e-01 7.48e-01 9.44e+02   1.6 0.00e+00   0.0 0.00e+00 2.87e-07R  9
-   8r 9.5193047e-01 2.03e-02 5.76e+02  -0.6 2.71e+00    -  1.00e+00 2.81e-01f  1
-   9  9.6247127e-01 2.03e-02 4.62e+04   1.5 4.30e+02    -  2.83e-03 4.41e-04h  3
+   0  0.0000000e+00 9.00e-01 0.00e+00   0.0 0.00e+00    -  0.00e+00 0.00e+00   0
+   1  0.0000000e+00 8.99e-01 3.65e+01  -6.0 1.44e+02    -  6.16e-03 9.48e-04h  4
+   2  0.0000000e+00 8.99e-01 6.67e+01   1.9 2.38e+06    -  4.29e-07 1.57e-09f  9
+   3r 0.0000000e+00 8.99e-01 9.99e+02  -0.0 0.00e+00    -  0.00e+00 2.61e-07R  2
+   4r 0.0000000e+00 8.94e-01 9.85e+02  -0.2 1.41e+01    -  9.91e-01 1.37e-02f  1
+   5r 0.0000000e+00 1.44e-01 4.74e+02  -0.8 2.70e+01    -  1.00e+00 5.19e-01f  1
+   6  0.0000000e+00 1.28e-01 4.90e+01  -6.2 9.58e+00    -  3.37e-01 1.12e-01h  3
+   7  0.0000000e+00 1.28e-01 4.91e+01  -6.4 6.16e+02    -  1.15e-03 3.22e-05h  7
+   8  0.0000000e+00 1.21e-01 7.81e+01   0.2 1.07e+01   0.0 1.00e+00 5.83e-02h  2
+   9  0.0000000e+00 1.20e-01 8.17e+01   1.3 3.37e+01  -0.5 2.14e-01 7.52e-03h  3
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  10  9.7146981e-01 2.03e-02 1.35e+05   0.8 5.06e+02    -  2.22e-03 3.85e-04h  3
-  11  9.7534345e-01 2.03e-02 9.57e+05   0.8 2.35e+03    -  4.33e-04 1.61e-04h  2
-  12  9.8011189e-01 2.03e-02 3.84e+06   0.8 4.73e+03    -  2.25e-04 1.90e-04h  1
-  13  9.8297625e-01 2.03e-02 3.84e+06   0.8 6.61e+03    -  1.57e-04 1.13e-04h  1
-  14  9.8586444e-01 2.03e-02 3.87e+06   0.8 3.48e+03   2.2 2.48e-04 1.14e-04h  1
-  15  9.8730573e-01 2.03e-02 3.87e+06   0.8 1.55e+04    -  4.74e-05 5.79e-05h  1
-  16  9.9052108e-01 2.03e-02 3.88e+06   0.8 2.13e+03   2.7 4.95e-04 1.28e-04h  1
-  17  9.9275357e-01 2.03e-02 3.89e+06   0.8 1.01e+04    -  6.31e-05 8.89e-05h  1
-  18  9.9360737e-01 2.03e-02 3.89e+06   0.8 1.32e+04    -  1.16e-04 3.41e-05h  1
-  19  9.9384184e-01 2.03e-02 3.89e+06   0.8 5.16e+04    -  9.92e-06 9.92e-06s  7
+  10  0.0000000e+00 9.02e-02 5.22e+02   0.8 9.52e+00    -  5.33e-01 2.46e-01h  2
+  11  0.0000000e+00 8.70e-02 5.60e+02   2.1 1.33e+01    -  3.67e-01 3.51e-02f  2
+  12  0.0000000e+00 6.58e-02 1.12e+03   1.5 9.57e+00    -  3.60e-01 2.44e-01h  1
+  13  0.0000000e+00 6.16e-02 1.13e+03   2.0 9.65e+00   0.9 3.17e-01 6.39e-02f  2
+  14  0.0000000e+00 5.83e-02 1.09e+03   2.0 9.88e+00   1.3 6.30e-01 5.33e-02h  3
+  15  0.0000000e+00 4.58e-02 1.37e+03   1.5 1.00e+01   1.7 9.72e-01 2.15e-01h  3
+  16  0.0000000e+00 2.29e-02 2.38e+04   1.3 9.89e+00   2.1 9.90e-01 5.00e-01h  2
+  17  0.0000000e+00 1.25e-02 8.08e+04   1.4 8.35e+00   2.6 1.00e+00 5.00e-01h  2
+  18  0.0000000e+00 1.08e-02 7.00e+04   1.9 8.89e+00   2.1 5.84e-01 1.31e-01f  3
+  19  0.0000000e+00 1.23e-02 2.88e+05   1.6 7.20e+00   2.5 8.26e-01 8.66e-01H  1
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  20  9.9808808e-01 2.03e-02 1.32e+07   0.8 5.38e+03   2.2 1.78e-04 0.00e+00S  7
-  21r 9.9808808e-01 2.03e-02 1.00e+03   0.8 0.00e+00   2.6 0.00e+00 2.94e-07R  6
-  22r 1.0131719e+00 1.78e-02 2.40e+02   1.4 1.78e+01    -  1.00e+00 1.04e-01f  1
-  23r 2.7730280e+00 1.20e-02 3.48e+02   1.0 1.83e+00    -  4.53e-01 9.60e-01f  1
-  24  3.2643519e+00 1.17e-02 3.96e+03   0.1 2.82e+01    -  2.89e-02 2.33e-02h  1
-  25  4.5653520e+00 1.10e-02 7.31e+03  -0.6 2.09e+01   2.1 1.67e-02 6.21e-02f  1
-  26  6.0536979e+00 2.35e-02 7.22e+03  -0.6 2.04e+01   1.7 9.36e-03 7.29e-02f  1
-  27  6.4317295e+00 2.31e-02 7.08e+03  -0.6 2.01e+01   2.1 2.33e-01 1.88e-02h  1
-  28  6.7351143e+00 2.27e-02 7.00e+03  -0.6 2.00e+01   2.5 5.77e-01 1.52e-02h  1
-  29  9.3705689e+00 2.07e-02 7.22e+03  -0.6 1.99e+01   2.0 5.28e-01 1.32e-01h  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  30  1.0780258e+01 1.98e-02 8.72e+03  -0.6 1.93e+01   2.5 1.52e-01 7.32e-02h  1
-  31  1.1522052e+01 1.88e-02 1.16e+04   1.6 1.90e+01   2.9 8.00e-02 3.91e-02f  1
-  32  1.2791856e+01 1.73e-02 2.74e+04   2.0 1.84e+01   2.4 9.96e-01 6.90e-02f  1
-  33  1.4633176e+01 1.51e-02 2.59e+05   2.7 1.82e+01    -  1.24e-01 1.01e-01f  1
-  34  1.4719283e+01 1.50e-02 2.57e+05   3.0 7.86e+01   2.8 6.64e-03 5.63e-03h  1
-  35  1.5139795e+01 1.48e-02 2.53e+05   1.7 2.14e+01   2.4 6.14e-02 2.47e-02h  1
-  36  1.5181006e+01 1.47e-02 2.52e+05   3.0 2.39e+02   2.8 4.83e-03 3.48e-03f  2
-  37  1.7770005e+01 1.25e-02 1.13e+06   3.0 1.79e+01   3.2 5.60e-01 1.45e-01f  1
-  38  1.9822125e+01 1.53e-02 1.51e+06   3.0 1.59e+01   4.5 1.10e-01 1.29e-01h  1
-  39  2.0972438e+01 1.45e-02 1.59e+06   3.0 1.70e+01   4.1 1.13e-01 6.77e-02h  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  40  2.4667609e+01 1.40e-02 5.65e+06   3.0 1.60e+01   4.5 2.58e-01 2.31e-01h  1
-  41  2.5870739e+01 1.39e-02 2.03e+07   3.0 1.42e+01   4.9 2.12e-02 8.27e-02F  1
-  42  2.6908541e+01 1.28e-02 1.87e+07   3.0 1.29e+01   5.3 1.00e-01 8.03e-02h  1
-  43  2.7330479e+01 1.24e-02 1.87e+07   3.0 1.31e+01   5.8 2.28e-02 3.23e-02h  1
-  44  2.7655689e+01 1.20e-02 2.08e+07   3.0 1.28e+01   6.2 8.09e-03 2.53e-02h  1
-  45  2.8855579e+01 1.65e-02 2.46e+08   2.1 1.73e+01   5.7 1.29e-02 1.05e-01f  1
-  46  2.9092773e+01 1.60e-02 2.39e+08   2.8 9.96e+00   6.1 1.58e-02 2.38e-02h  1
-  47  2.9103394e+01 1.60e-02 2.39e+08   2.1 1.12e+01   6.6 1.02e-02 9.48e-04h  1
-  48  2.9758717e+01 1.50e-02 2.24e+08   1.4 1.10e+01   6.1 6.83e-03 5.96e-02f  1
-  49  2.9781914e+01 1.50e-02 2.24e+08   0.7 1.17e+01   6.5 8.15e-02 1.98e-03h  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  50  3.0176623e+01 1.47e-02 2.16e+08   0.7 1.17e+01   6.0 1.95e-01 3.39e-02h  1
-  51  3.0325005e+01 1.45e-02 2.13e+08   0.7 1.17e+01   6.5 2.11e-01 1.27e-02h  1
-  52  3.1434522e+01 1.39e-02 1.92e+08   0.7 1.16e+01   6.0 2.10e-01 9.58e-02h  1
-  53  3.1482459e+01 1.39e-02 1.91e+08   0.7 1.12e+01   6.4 5.40e-03 4.26e-03h  1
-  54  3.1632132e+01 1.37e-02 1.89e+08   0.7 1.14e+01   5.9 1.80e-01 1.31e-02h  1
-  55  3.5635586e+01 9.73e-03 1.33e+08   2.0 1.12e+01   6.4 1.00e+00 3.56e-01f  1
-  56  4.3881537e+01 2.90e-02 1.15e+09   3.0 8.25e+00   6.8 1.77e-02 1.00e+00f  1
-  57  4.4510509e+01 1.22e-02 4.80e+08   3.0 6.29e-01   7.2 4.41e-01 1.00e+00f  1
-  58  4.4417560e+01 2.17e-03 2.14e+08   3.0 1.75e-01   7.6 9.54e-01 1.00e+00f  1
-  59  4.4394895e+01 3.20e-04 3.19e+07   3.0 2.66e-02   8.1 1.18e-01 8.52e-01f  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  60  4.4399720e+01 1.27e-06 1.31e+06   2.6 4.83e-03   7.6 1.00e+00 1.00e+00f  1
-  61  4.4399787e+01 3.86e-10 1.32e+03   0.9 1.04e-04   7.1 1.00e+00 1.00e+00f  1
-  62  4.4399788e+01 2.82e-12 6.67e+01  -1.0 1.57e-05   6.6 1.00e+00 1.00e+00f  1
-  63  4.4399789e+01 2.27e-11 6.37e+01  -1.1 4.50e-05   6.2 1.00e+00 1.00e+00f  1
-  64  4.4399793e+01 1.62e-10 5.66e+01  -1.1 1.20e-04   5.7 1.00e+00 1.00e+00f  1
-  65  4.4399801e+01 9.90e-10 4.41e+01  -1.1 2.81e-04   5.2 1.00e+00 1.00e+00f  1
-  66  4.4399813e+01 5.70e-09 2.99e+01  -1.1 5.72e-04   4.7 1.00e+00 1.00e+00f  1
-  67  4.4399822e+01 3.12e-08 1.90e+01  -1.1 1.09e-03   4.2 1.00e+00 1.00e+00f  1
-  68  4.4399794e+01 1.59e-07 1.18e+01  -1.1 2.02e-03   3.8 1.00e+00 1.00e+00f  1
-  69  4.4399600e+01 6.91e-07 7.18e+00  -1.1 3.70e-03   3.3 1.00e+00 1.00e+00f  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  70  4.4398613e+01 2.68e-09 6.39e-01  -2.8 9.88e-04   2.8 1.00e+00 1.00e+00h  1
-  71  4.2031538e+01 1.40e-01 7.24e+01  -2.2 2.37e+00    -  7.62e-01 1.00e+00f  1
-  72  4.2456174e+01 6.27e-02 1.14e+03  -2.4 6.70e-01   2.3 1.00e+00 6.33e-01h  1
-  73  4.2594964e+01 5.63e-02 1.02e+03  -2.4 1.35e+00   1.9 6.87e-03 1.03e-01h  1
-  74  4.3171644e+01 2.89e-02 5.98e+02  -2.4 1.15e+00   2.3 4.81e-01 5.03e-01h  1
-  75  4.3243021e+01 2.67e-02 5.52e+02  -1.8 9.35e-01   1.8 1.00e+00 7.63e-02h  1
-  76  4.4049151e+01 4.40e-03 5.98e+02  -3.2 9.16e-01   1.3 5.50e-01 8.80e-01h  1
-  77  4.4191467e+01 5.01e-05 1.37e+02  -2.2 1.42e-01   0.9 1.00e+00 1.00e+00h  1
-  78  4.4151663e+01 8.32e-05 8.30e+00  -3.1 3.98e-02   0.4 1.00e+00 1.00e+00f  1
-  79  4.4050696e+01 6.84e-04 1.76e-01  -4.0 1.01e-01  -0.1 1.00e+00 1.00e+00f  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  80  4.4013498e+01 5.34e-04 1.36e-01  -4.4 1.48e-01  -0.6 1.00e+00 4.44e-01h  1
-  81  4.4008849e+01 5.24e-04 2.33e-01  -3.6 1.95e+00    -  1.00e+00 1.91e-02h  1
-  82  4.3911079e+01 6.41e-03 1.05e+01  -2.5 1.68e+00    -  9.52e-01 7.05e-01f  1
-  83  4.3969288e+01 1.70e-03 2.28e+00  -3.0 4.53e-01    -  1.00e+00 1.00e+00h  1
-  84  4.3952722e+01 1.56e-04 1.19e-01  -3.9 8.44e-02    -  1.00e+00 1.00e+00h  1
-  85  4.3952212e+01 1.44e-05 3.34e-03  -5.4 1.66e-02    -  1.00e+00 9.90e-01h  1
-  86  4.3952228e+01 1.20e-06 1.98e-03  -7.0 1.34e-02    -  1.00e+00 1.00e+00h  1
-  87  4.3952236e+01 1.92e-07 2.62e-02  -6.9 6.19e-01    -  1.00e+00 1.00e+00h  1
-  88  4.3952236e+01 4.52e-08 3.95e-05  -8.6 2.31e-03    -  1.00e+00 1.00e+00h  1
-  89  4.3952237e+01 6.94e-09 4.09e-05  -9.9 6.13e-03    -  1.00e+00 1.00e+00h  1
-iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-  90  4.3952237e+01 3.34e-10 1.59e-05 -11.0 1.09e-02    -  1.00e+00 1.00e+00h  1
-  91  4.3952237e+01 9.49e-13 8.77e-06 -11.0 1.13e-01    -  1.00e+00 1.00e+00h  1
-  92  4.3952237e+01 2.22e-16 2.49e-13 -11.0 2.67e-08    -  1.00e+00 1.00e+00h  1
+  20  0.0000000e+00 1.04e-02 3.34e+05   1.4 1.16e+00   2.9 1.00e+00 1.00e+00f  1
+  21  0.0000000e+00 4.60e-03 1.99e+05   1.2 4.76e-01   2.5 1.00e+00 1.00e+00f  1
+  22  0.0000000e+00 3.85e-04 1.76e+04   0.5 6.66e-01   2.9 1.00e+00 1.00e+00f  1
+  23  0.0000000e+00 4.20e-05 1.96e+03  -0.5 1.39e-01   2.4 1.00e+00 1.00e+00h  1
+  24  0.0000000e+00 6.30e-09 4.55e+00  -2.1 3.29e-04   1.9 1.00e+00 1.00e+00h  1
+  25  0.0000000e+00 1.64e-12 5.79e-04  -4.0 1.34e-05   1.4 1.00e+00 1.00e+00h  1
+  26  0.0000000e+00 1.93e-14 3.60e-07 -10.0 3.11e-07    -  9.99e-01 1.00e+00h  1
+  27  0.0000000e+00 2.22e-16 3.43e-11 -11.0 3.66e-12   1.0 1.00e+00 1.00e+00h  1
 
-Number of Iterations....: 92
+Number of Iterations....: 27
 
                                    (scaled)                 (unscaled)
-Objective...............:   4.3952237250265767e+01    4.3952237250265767e+01
-Dual infeasibility......:   2.4868995751603507e-13    2.4868995751603507e-13
+Objective...............:   0.0000000000000000e+00    0.0000000000000000e+00
+Dual infeasibility......:   3.4276423871540053e-11    3.4276423871540053e-11
 Constraint violation....:   2.2204460492503131e-16    2.2204460492503131e-16
-Variable bound violation:   9.9510684137271710e-09    9.9510684137271710e-09
-Complementarity.........:   1.0000361127466252e-11    1.0000361127466252e-11
-Overall NLP error.......:   1.0000361127466252e-11    1.0000361127466252e-11
+Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
+Complementarity.........:   1.0000000142814215e-11    1.0000000142814215e-11
+Overall NLP error.......:   3.4276423871540053e-11    3.4276423871540053e-11
 
 
-Number of objective function evaluations             = 137
-Number of objective gradient evaluations             = 91
-Number of equality constraint evaluations            = 137
+Number of objective function evaluations             = 89
+Number of objective gradient evaluations             = 27
+Number of equality constraint evaluations            = 89
 Number of inequality constraint evaluations          = 0
-Number of equality constraint Jacobian evaluations   = 96
+Number of equality constraint Jacobian evaluations   = 29
 Number of inequality constraint Jacobian evaluations = 0
-Number of Lagrangian Hessian evaluations             = 92
-Total seconds in IPOPT                               = 9.662
+Number of Lagrangian Hessian evaluations             = 27
+Total seconds in IPOPT                               = 5.542
 
 EXIT: Optimal Solution Found.</code></pre><p>and plot the solutions.</p><pre><code class="language-julia hljs">solution_x = L_x[end]
 solution_x.variable
-plot_sol(solution_x)</code></pre><img src="bisaturation-79465828.svg" alt="Example block output"/><p>Conclusion: The solution is considered local, as the final time exceeds the one found using the Bocop software as mentioned in <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>. Let us now solve this problem differently. One potential initial guess could be obtained by solving a monosaturation problem where the control field intensity is the same for both spins, <em>i.e.</em>, <span>$ϵ = 0$</span>, and then using homotopy to transition to <span>$ϵ = 0.1$</span>. We start by solving the problem for a single spin and then extend this approach to two identical spins before applying homotopy.</p><h2 id="Homotopy-on-ϵ"><a class="docs-heading-anchor" href="#Homotopy-on-ϵ">Homotopy on ϵ</a><a id="Homotopy-on-ϵ-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-ϵ" title="Permalink"></a></h2><h3 id="Monosaturation-problem"><a class="docs-heading-anchor" href="#Monosaturation-problem">Monosaturation problem</a><a id="Monosaturation-problem-1"></a><a class="docs-heading-anchor-permalink" href="#Monosaturation-problem" title="Permalink"></a></h3><pre><code class="language-julia hljs">@def ocp begin
-    tf ∈ R, variable
-    t ∈ [0, tf], time
-    q = (y, z) ∈ R², state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    q(0) == [0, 1] # North pole
-    q(tf) == [0, 0] # Center
-    q̇(t) == [(-Γ * y(t) - u(t) * z(t)),( γ * (1 - z(t)) + u(t) * y(t))]
-    tf → min
-end
+plot_sol(solution_x)</code></pre><img src="bisaturation-1e2af319.svg" alt="Example block output"/><p>Conclusion: The solution is considered local, as the final time exceeds the one found using the Bocop software as mentioned in <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>. Let us now solve this problem differently. One potential initial guess could be obtained by solving a monosaturation problem where the control field intensity is the same for both spins, <em>i.e.</em>, <span>$ϵ = 0$</span>, and then using homotopy to transition to <span>$ϵ = 0.1$</span>. We start by solving the problem for a single spin and then extend this approach to two identical spins before applying homotopy.</p><h2 id="Homotopy-on-ϵ"><a class="docs-heading-anchor" href="#Homotopy-on-ϵ">Homotopy on ϵ</a><a id="Homotopy-on-ϵ-1"></a><a class="docs-heading-anchor-permalink" href="#Homotopy-on-ϵ" title="Permalink"></a></h2><h3 id="Monosaturation-problem"><a class="docs-heading-anchor" href="#Monosaturation-problem">Monosaturation problem</a><a id="Monosaturation-problem-1"></a><a class="docs-heading-anchor-permalink" href="#Monosaturation-problem" title="Permalink"></a></h3><pre><code class="language-julia hljs">q₀ = [0, 1]
+ocp = ocp1(q₀)
 N = 100
 sol = solve(ocp, grid_size=N)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>Now we extract the control, final time and then duplicate the state to be able to have an initial guess for the two spins.</p><pre><code class="language-julia hljs">u_init = sol.control
 q_init(t) = [sol.state(t); sol.state(t)]
-tf_init = sol.variable</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">42.92904775237406</code></pre><h3 id="Bi-saturation-problem"><a class="docs-heading-anchor" href="#Bi-saturation-problem">Bi-saturation problem</a><a id="Bi-saturation-problem-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-saturation-problem" title="Permalink"></a></h3><pre><code class="language-julia hljs">@def ocp2 begin
-    tf ∈ R, variable
-    t ∈ [0, tf], time
-    q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    q(0) == [0, 1, 0, 1]
-    q(tf) == [0, 0, 0, 0]
-    q̇(t) == [-Γ * y₁(t) - u(t) * z₁(t),
-            γ * (1 - z₁(t)) + u(t) * y₁(t),
-            -Γ * y₂(t) - u(t) * z₂(t),
-            γ * (1 - z₂(t)) + u(t) * y₂(t)]
-    tf → min
-end
-
+tf_init = sol.variable</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">45.94443740955139</code></pre><h3 id="Bi-saturation-problem"><a class="docs-heading-anchor" href="#Bi-saturation-problem">Bi-saturation problem</a><a id="Bi-saturation-problem-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-saturation-problem" title="Permalink"></a></h3><pre><code class="language-julia hljs">ocp_0 = ocp2(q₀₁, q₀₁, 0)
 init = (state=q_init, control=u_init, variable=tf_init)
-sol2 = solve(ocp2; grid_size=N, init=init)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We define the function below that computes the problem depending on <span>$\varepsilon$</span>: </p><pre><code class="language-julia hljs"># Define the optimal control problem with parameter ϵ
-function f(ϵ)
-    @def ocp begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        x ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        x(0) == [0, 1, 0, 1]
-        x(tf) == [0, 0, 0, 0]
-
-        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)),
-                (γ*(1-x₂(t)) +u(t)*x₁(t)),
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-        tf → min
-    end
-    return ocp
-end
-
-ϵ = 0
+sol2 = solve(ocp_0 ; grid_size=N, init=init)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We define the function below that computes the problem depending on <span>$\varepsilon$</span>: </p><pre><code class="language-julia hljs">ϵ₁ = 0
 initial_guess = sol2
 L = [sol2]
 for i in 1:10
-    global ϵ = ϵ + 0.01
-    global initial_guess
-    ocpi = f(ϵ)
+    global ϵ₁ = ϵ₁ + 0.01
+    ocpi = ocp2(q₀₁, q₀₁, ϵ₁)
     sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
     global L
     push!(L, sol_i)
-    initial_guess = sol_i
+    global initial_guess = sol_i
 end
 sol_eps = L[end]
 sol_eps.variable
-plot_sol(sol_eps)</code></pre><img src="bisaturation-a6d70e5e.svg" alt="Example block output"/><p>Conclusion: The solution is a local one.</p><p>Another approach involves defining a bi-saturation problem with a slightly adjusted initial condition: <span>$q₀ = [0.1, 0.9, 0.1, 0.9]$</span>.</p><h2 id="Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem"><a class="docs-heading-anchor" href="#Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem">Bi-Saturation Problem: initial Guess from a Slightly Different Problem</a><a id="Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem" title="Permalink"></a></h2><pre><code class="language-julia hljs">ϵ = 0.1
-
-@def ocpu begin
-tf ∈ R, variable
-t ∈ [0, tf], time
-x ∈ R⁴, state
-u ∈ R, control
-tf ≥ 0
--1 ≤ u(t) ≤ 1
-x(0) == [0.1, 0.9, 0.1, 0.9] # Initial condition
-x(tf) == [0, 0, 0, 0] # Terminal condition
-ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
-          (γ*(1-x₂(t)) +u(t)*x₁(t)),
-          (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
-          (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-          tf → min
-end
+plot_sol(sol_eps)</code></pre><img src="bisaturation-9918570a.svg" alt="Example block output"/><p>Conclusion: The solution is a local one.</p><p>Another approach involves defining a bi-saturation problem with a slightly adjusted initial condition: <span>$q₀ = [0.1, 0.9, 0.1, 0.9]$</span>.</p><h2 id="Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem"><a class="docs-heading-anchor" href="#Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem">Bi-Saturation Problem: initial Guess from a Slightly Different Problem</a><a id="Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem-1"></a><a class="docs-heading-anchor-permalink" href="#Bi-Saturation-Problem:-initial-Guess-from-a-Slightly-Different-Problem" title="Permalink"></a></h2><pre><code class="language-julia hljs">ϵ = 0.1
+q₁₉ = [0.1, 0.9]
+ocpu = ocp2(q₁₉, q₁₉, ϵ)
 initial_g = solve(ocpu, grid_size=100)
-ocpf = f(ϵ)
+ocpf = prob
 for i in 1:10
     global initial_g
     solf = solve(ocpf, grid_size=i*100, init=initial_g)
     initial_g = solf
 end
 # Plot the figures
-plot_sol(initial_g)</code></pre><img src="bisaturation-4ab44d1a.svg" alt="Example block output"/><p>Conclusion: This solution is better that the two previous, which proves that these were strict local minimisers.</p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Introduction</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Sunday 7 July 2024 09:37">Sunday 7 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot_sol(initial_g)</code></pre><img src="bisaturation-2cdfab44.svg" alt="Example block output"/><p>Conclusion: This solution is better that the two previous, which proves that these were strict local minimisers.</p><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Introduction</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Monday 8 July 2024 09:19">Monday 8 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
