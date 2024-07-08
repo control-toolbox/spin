@@ -24,28 +24,6 @@ using Plots
 γ = 3.65e-3
 ϵ = 0.1
 
-@def ocp begin
-    tf ∈ R, variable
-    t ∈ [ 0, tf ], time
-    x ∈ R⁴, state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    x(0) == [0, 1, 0, 1 ]
-    x(tf) == [0, 0, 0, 0]
-    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), (γ*(1-x₂(t)) +u(t)*x₁(t)), (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-    tf → min
-end
-```
-However, we quickly realize that solving this problem without any prior initial guesses is not feasible. This realization prompts us to explore potential solutions that facilitate problem-solving.
-
-One effective approach involves homotopy on the initial condition. This method begins from an initial point where the problem can be resolved without requiring any initial guesses. Subsequently, we generate a sequence of initial guesses by solving intermediate problems created through homotopy, gradually progressing towards our original initial condition: $[0, 1, 0, 1]$. Using $[1, 0, 1, 0]$ as our initial guess revealed that it can serve as the starting point for this homotopy process.
-
-## Homotopy on the initial condition
-The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from $[1, 0, 1, 0]$, advancing towards the desired initial condition of $[0, 1, 0, 1]$.
-
-Letus first define functions that define the optimal control problem with initial state q₀ and plot the solutions: 
-```@example main
 function F0(q)
     y, z = q
     res = [-Γ*y, γ*(1-z)]
@@ -60,10 +38,8 @@ function F1(q)
 end
 
 F0(q₁, q₂) = [ F0(q₁); F0(q₂) ]
-F1(q₁, q₂, ε) = [ F1(q₁); (1 - ε) * F1(q₂) ] # check!
-```
+F1(q₁, q₂, ε) = [ F1(q₁); (1 - ε) * F1(q₂) ]
 
-```@example main
 # Define the optimal control problem with initial state q₀ in the case of one spin
 function ocp1(q₀)
     @def o begin
@@ -97,6 +73,19 @@ function ocp2(q₁₀, q₂₀, ε)
     end
     return o
 end
+prob = ocp2([0,1], [0,1], ϵ)
+```
+However, we quickly realize that solving this problem without any prior initial guesses is not feasible. This realization prompts us to explore potential solutions that facilitate problem-solving.
+
+One effective approach involves homotopy on the initial condition. This method begins from an initial point where the problem can be resolved without requiring any initial guesses. Subsequently, we generate a sequence of initial guesses by solving intermediate problems created through homotopy, gradually progressing towards our original initial condition: $[0, 1, 0, 1]$. Using $[1, 0, 1, 0]$ as our initial guess revealed that it can serve as the starting point for this homotopy process.
+
+## Homotopy on the initial condition
+The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from $[1, 0, 1, 0]$, advancing towards the desired initial condition of $[0, 1, 0, 1]$.
+
+
+
+```@example main
+
 function plot_sol(sol)
     q = sol.state
     liste = [q(t) for t in sol.times]
@@ -115,14 +104,14 @@ end
 Then we perform homotopy on the initial condition with a step of 0.1,
 
 ```@example main
-q₀₁ = [0, 1]
+q₀₁ = [1, 0]
 ocp_x = ocp2(q₀₁, q₀₁, ϵ)
 sol_x = solve(ocp_x, grid_size=100)
 sol_x.variable
 L_x = [sol_x]
 for i in 1:10
     x₀ = i / 10 * [0, 1, 0, 1] + (1 - i / 10) * [1, 0, 1, 0]
-    ocpi_x = g(x₀)
+    ocpi_x = ocp2(x₀[1:2], x₀[3:4], ϵ)
     sol_i_x = solve(ocpi_x, grid_size=100, display=false, init=L_x[end]) 
     push!(L_x, sol_i_x)
 end
@@ -196,7 +185,7 @@ Another approach involves defining a bi-saturation problem with a slightly adjus
 q₁₉ = [0.1, 0.9]
 ocpu = ocp2(q₁₉, q₁₉, ϵ)
 initial_g = solve(ocpu, grid_size=100)
-ocpf = f(ϵ)
+ocpf = prob
 for i in 1:10
     global initial_g
     solf = solve(ocpf, grid_size=i*100, init=initial_g)
