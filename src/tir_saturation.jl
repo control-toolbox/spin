@@ -4,17 +4,15 @@ using Plots
 
 include("bsat.jl")
 
-# Define the parameters of the problem
-Γ = 9.855e-2  
-γ = 3.65e-3  
-ϵ =0.1
+ϵ = 0.1
+q0 = [0, 1, 0, 1]
+
 function F0i(q)
     y, z = q
     res = [-Γ*y, γ*(1-z)]
     return res
 end
 
-# idem for F1
 function F1i(q)
     y, z = q
     res = [-z, y]
@@ -88,7 +86,6 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2+0.1]
 t3 = min(t3f...)
 p0 = p(t0)
-q0 = [0, 1, 0, 1]
 tf = initial_g.variable
 using DifferentialEquations
 f1 = Flow(ocp_t, (q, p, tf) -> -uₘ)
