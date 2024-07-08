@@ -63,13 +63,13 @@ function ocp2(q₁₀, q₂₀, ε)
         q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
         u ∈ R, control
         -1 ≤ u(t) ≤ 1
-        q₁ = [y₁, z₁]
-        q₂ = [y₂, z₂]
-        q₁(0) == q₁₀
-        q₂(0) == q₂₀
-        q₁(tf) == [0, 0]
-        q₂(tf) == [0, 0]
-        q̇(t) == F0(q₁(t), q₂(t)) + u(t) * F1(q₁(t), q₂(t), ε)
+        qᵢ₁ = [y₁, z₁]
+        qᵢ₂ = [y₂, z₂]
+        qᵢ₁(0) == q₁₀
+        qᵢ₂(0) == q₂₀
+        qᵢ₁(tf) == [0, 0]
+        qᵢ₂(tf) == [0, 0]
+        q̇(t) == F0(qᵢ₁(t), qᵢ₂(t)) + u(t) * F1(qᵢ₁(t), qᵢ₂(t), ε)
     end
     return o
 end
