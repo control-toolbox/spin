@@ -164,11 +164,12 @@ We define the function below that computes the problem depending on $\varepsilon
 initial_guess = sol2
 L = [sol2]
 for i in 1:10
-    ϵ₁ = ϵ₁ + 0.01
+    global ϵ₁ = ϵ₁ + 0.01
     ocpi = ocp2(q₀₁, q₀₁, ϵ₁)
     sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
+    global L
     push!(L, sol_i)
-    initial_guess = sol_i
+    global initial_guess = sol_i
 end
 sol_eps = L[end]
 sol_eps.variable
