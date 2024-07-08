@@ -44,29 +44,59 @@ One effective approach involves homotopy on the initial condition. This method b
 ## Homotopy on the initial condition
 The code below demonstrates how this approach systematically generates initial guesses using homotopy starting from $[1, 0, 1, 0]$, advancing towards the desired initial condition of $[0, 1, 0, 1]$.
 
-Letus first define functions that define the optimal control problem with initial state x₀ and plot the solutions: 
-
+Letus first define functions that define the optimal control problem with initial state q₀ and plot the solutions: 
 ```@example main
-# Define the optimal control problem with initial state x₀
-function g(x₀)
-    @def ocp begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        x ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        x(0) == x₀
-        x(tf) == [0, 0, 0, 0]
-        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
-                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-        tf → min
-    end
-    return ocp
+function F0(q)
+    y, z = q
+    res = [-Γ*y, γ*(1-z)]
+    return res
 end
 
+# idem for F1
+function F1(q)
+    y, z = q
+    res = [-z, y]
+    return res
+end
+
+F0(q₁, q₂) = [ F0(q₁); F0(q₂) ]
+F1(q₁, q₂, ε) = [ F1(q₁); (1 - ε) * F1(q₂) ] # check!
+```
+
+```@example main
+# Define the optimal control problem with initial state q₀ in the case of one spin
+function ocp1(q₀)
+    @def o begin
+        tf ∈ R, variable
+        t ∈ [0, tf], time
+        q = (y, z) ∈ R², state
+        u ∈ R, control
+        -1 ≤ u(t) ≤ 1
+        q(0) == q₀
+        q(tf) == [0, 0]
+        q̇(t) == F0(q(t)) + u(t) * F1(q(t))
+    end
+    return o
+end
+
+# Define the optimal control problem with initial state q₀ in the case of two spins
+function ocp2(q₁₀, q₂₀, ε)
+    @def o begin
+        tf ∈ R, variable
+        t ∈ [0, tf], time
+        q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
+        u ∈ R, control
+        -1 ≤ u(t) ≤ 1
+        q₁ = [y₁, z₁]
+        q₂ = [y₂, z₂]
+        q₁(0) == q₁₀
+        q₂(0) == q₂₀
+        q₁(tf) == [0, 0]
+        q₂(tf) == [0, 0]
+        q̇(t) == F0(q₁(t), q₂(t)) + u(t) * F1(q₁(t), q₂(t), ε)
+    end
+    return o
+end
 function plot_sol(sol)
     q = sol.state
     liste = [q(t) for t in sol.times]
@@ -85,7 +115,8 @@ end
 Then we perform homotopy on the initial condition with a step of 0.1,
 
 ```@example main
-ocp_x = g([1, 0, 1, 0])
+q₀₁ = [0, 1]
+ocp_x = ocp2(q₀₁, q₀₁, ϵ)
 sol_x = solve(ocp_x, grid_size=100)
 sol_x.variable
 L_x = [sol_x]
@@ -114,18 +145,8 @@ Let us now solve this problem differently. One potential initial guess could be 
 ### Monosaturation problem
 
 ```@example main
-@def ocp begin
-    tf ∈ R, variable
-    t ∈ [0, tf], time
-    q = (y, z) ∈ R², state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    q(0) == [0, 1] # North pole
-    q(tf) == [0, 0] # Center
-    q̇(t) == [(-Γ * y(t) - u(t) * z(t)),( γ * (1 - z(t)) + u(t) * y(t))]
-    tf → min
-end
+q₀ = [0, 1]
+ocp = ocp1(q₀)
 N = 100
 sol = solve(ocp, grid_size=N) 
 ```
@@ -141,59 +162,22 @@ tf_init = sol.variable
 ### Bi-saturation problem
 
 ```@example main
-@def ocp2 begin
-    tf ∈ R, variable
-    t ∈ [0, tf], time
-    q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
-    u ∈ R, control
-    tf ≥ 0
-    -1 ≤ u(t) ≤ 1
-    q(0) == [0, 1, 0, 1] 
-    q(tf) == [0, 0, 0, 0] 
-    q̇(t) == [-Γ * y₁(t) - u(t) * z₁(t),
-            γ * (1 - z₁(t)) + u(t) * y₁(t),
-            -Γ * y₂(t) - u(t) * z₂(t),
-            γ * (1 - z₂(t)) + u(t) * y₂(t)]
-    tf → min
-end
-
+ocp_0 = ocp2(q₀₁, q₀₁, 0)
 init = (state=q_init, control=u_init, variable=tf_init)
-sol2 = solve(ocp2; grid_size=N, init=init)
+sol2 = solve(ocp_0 ; grid_size=N, init=init)
 ```
 
 We define the function below that computes the problem depending on $\varepsilon$: 
 
 ```@example main
-# Define the optimal control problem with parameter ϵ
-function f(ϵ)
-    @def ocp begin
-        tf ∈ R, variable 
-        t ∈ [0, tf], time 
-        x ∈ R⁴, state    
-        u ∈ R, control    
-        tf ≥ 0            
-        -1 ≤ u(t) ≤ 1     
-        x(0) == [0, 1, 0, 1] 
-        x(tf) == [0, 0, 0, 0] 
-        
-        ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
-                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-        tf → min 
-    end
-    return ocp
-end
 
-ϵ = 0
+ϵ₁ = 0
 initial_guess = sol2
 L = [sol2]
 for i in 1:10
-    global ϵ = ϵ + 0.01
-    global initial_guess
-    ocpi = f(ϵ)
+    ϵ₁ = ϵ₁ + 0.01
+    ocpi = ocp2(q₀₁, q₀₁, ϵ₁)
     sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
-    global L
     push!(L, sol_i)
     initial_guess = sol_i
 end
@@ -209,22 +193,8 @@ Another approach involves defining a bi-saturation problem with a slightly adjus
 ##  Bi-Saturation Problem: initial Guess from a Slightly Different Problem
 ```@example main
 ϵ = 0.1
-
-@def ocpu begin
-tf ∈ R, variable
-t ∈ [0, tf], time
-x ∈ R⁴, state
-u ∈ R, control
-tf ≥ 0
--1 ≤ u(t) ≤ 1
-x(0) == [0.1, 0.9, 0.1, 0.9] # Initial condition
-x(tf) == [0, 0, 0, 0] # Terminal condition
-ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
-          (γ*(1-x₂(t)) +u(t)*x₁(t)),
-          (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
-          (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
-          tf → min
-end
+q₁₉ = [0.1, 0.9]
+ocpu = ocp2(q₁₉, q₁₉, ϵ)
 initial_g = solve(ocpu, grid_size=100)
 ocpf = f(ϵ)
 for i in 1:10
