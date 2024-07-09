@@ -155,7 +155,7 @@ tf_init = sol.variable
 ### Bi-saturation problem
 
 ```@example main
-ocp_0 = ocp2(q₀₁, q₀₁, 0)
+ocp_0 = ocp2(q₀, q₀, 0)
 init = (state=q_init, control=u_init, variable=tf_init)
 sol2 = solve(ocp_0 ; grid_size=N, init=init)
 ```
@@ -169,7 +169,7 @@ initial_guess = sol2
 L = [sol2]
 for i in 1:10
     global ϵ₁ = ϵ₁ + 0.01
-    ocpi = ocp2(q₀₁, q₀₁, ϵ₁)
+    ocpi = ocp2(q₀, q₀, ϵ₁)
     sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
     global L
     push!(L, sol_i)
