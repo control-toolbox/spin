@@ -39,8 +39,6 @@ function plot_sol(sol)
         plot(sol.times, sol.control, xlabel="Time", ylabel="Control")
     )
 end
-
-
 ϵ₀ = 0.1
 @def ocpu begin
     tf ∈ R, variable
