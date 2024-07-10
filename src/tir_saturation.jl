@@ -41,7 +41,7 @@ function ocp2(q₁₀, q₂₀)
     return o
 end
 prob = ocp2([0,1], [0,1])
-
+solution_2000 = solve(prob, grid_size=2000, display=false, init=initial_g)
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
@@ -49,10 +49,10 @@ H001 = @Lie { H0, H01 }
 H101 = @Lie { H1, H01 }
 us(q, p) = -H001(q, p) / H101(q, p)
 
-t = initial_g.times
-q = initial_g.state
-u = initial_g.control
-p = initial_g.costate
+t = solution_2000.times
+q = solution_2000.state
+u = solution_2000.control
+p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
 H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
@@ -92,14 +92,17 @@ t1 = min(t_l...)
 t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2+0.1]
 t3 = min(t3f...)
-p0 =p(t0) + 0.1 *[1, 1, 1, 1] 
-tf = initial_g.variable
+p0 =p(t0) 
+tf = solution_2000.variable
 using DifferentialEquations
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
 println("t3 = ", t3)
 println("tf = ", tf)
+
+
+
 using LinearAlgebra: norm
 using MINPACK
 s = similar(p0, 8)
@@ -107,5 +110,5 @@ shoot!(s, p0, t1, t2, t3, tf)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])   # auxiliary function
                                                                # with aggregated inputs
-ξ = [ p0 ; t1 ; t2 ; t3 ; tf ]                                 # initial guess
-indirect_sol = fsolve(nle, ξ)
+ξ = [ p0 ; t1 ; t2 ; t3 ; tf ]                                 
+indirect_sol = fsolve(nle, ξ; tol=1e-6)
