@@ -55,12 +55,13 @@ u = solution_2000.control
 p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
+
 H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
+fₚ = Flow(prob, (q, p, tf) -> umax)
+fₘ = Flow(prob, (q, p, tf) -> - umax)
+fs = Flow(prob, (q, p, tf) -> us(q, p))
 
 function shoot!(s, p0, t1, t2, t3, tf)
-    fₚ = Flow(prob, (q, p, tf) -> umax)
-    fₘ = Flow(prob, (q, p, tf) -> - umax)
-    fs = Flow(prob, (q, p, tf) -> us(q, p))
     q1, p1 = fₘ(0, q0, p0, t1)
     q2, p2 = fs(t1, q1, p1, t2)
     q3, p3 = fₚ(t2, q2, p2, t3)
@@ -75,12 +76,12 @@ function shoot!(s, p0, t1, t2, t3, tf)
     s[8] = (pf[2] + pf[4]) * γ - 1
 end
 t0 = 0
-tol = 0.02
+tol = 2e-2
 t13 = [ elt for elt in t if abs(u(elt)) < tol]
 i = 1
 t_l = []
 while(true)
-    if(t13[i+1] - t13[i] > 1)
+    if (( i == length(t13)-1) || (t13[i+1] - t13[i] > 1) )
         break
     else 
         push!(t_l, t13[i])
@@ -90,10 +91,10 @@ while(true)
 end
 t1 = min(t_l...)
 t2 = max(t_l...)
-t3f = [elt for elt in t13 if elt > t2+0.1]
+t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 p0 =p(t0) 
-tf = solution_2000.variable
+tf = solution_2000.objective
 using DifferentialEquations
 println("p0 = ", p0)
 println("t1 = ", t1)
@@ -112,3 +113,23 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])   # auxiliary fu
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ]                                 
 indirect_sol = fsolve(nle, ξ; tol=1e-6)
+p0i = indirect_sol.x[1:4]
+t1i = indirect_sol.x[5]
+t2i = indirect_sol.x[6]
+t3i = indirect_sol.x[7]
+tfi = indirect_sol.x[8]
+
+println("p0 = ", p0i)
+println("t1 = ", t1i)
+println("t2 = ", t2i)
+println("t3 = ", t3i)
+println("tf = ", tfi)
+
+# Norm of the shooting function at solution
+si = similar(p0i, 8)
+shoot!(si, p0i, t1i, t2i, t3i, tfi)
+println("Norm of the shooting function: ‖si‖ = ", norm(si), "\n")
+f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs)
+flow_sol = f_sol((t0, tfi), q0, p0i) 
+plt = plot(solution_2000, solution_label="(direct)")
+plot(plt, flow_sol, solution_label="(indirect)")
