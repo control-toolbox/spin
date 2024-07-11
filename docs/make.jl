@@ -8,6 +8,7 @@ makedocs(;
     pages = [
         "Introduction" => "index.md",
         "Bisaturation" => "bisaturation.md",
+        "BisaturationIndirect" => "tir_saturation.md",
     ],
     checkdocs=:none,
 )

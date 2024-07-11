@@ -3,10 +3,14 @@
 Previously, we attempted to solve the bi-saturation problem as mentioned in [^1] using a direct method. We will now proceed to solve the same problem using an indirect method, which will require us to use the solution from the direct method as an initial guess. 
 
 ## Direct Method : 
-Let's first import the necessary packages, *OptimalControl* and *Plots* : 
+Let's first import the necessary packages, *OptimalControl*, *Plots* ... : 
 ```@example main
 using OptimalControl
 using Plots
+using DifferentialEquations
+using LinearAlgebra
+using MINPACK
+using NLPModelsIpopt
 ```
 We will now define the parameters and the functions that we will use later on : 
 ```@example main 
