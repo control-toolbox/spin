@@ -56,7 +56,7 @@ p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
 
-H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
+#H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> - umax)
 fs = Flow(prob, (q, p, tf) -> us(q, p))
@@ -131,5 +131,6 @@ shoot!(si, p0i, t1i, t2i, t3i, tfi)
 println("Norm of the shooting function: ‖si‖ = ", norm(si), "\n")
 f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs)
 flow_sol = f_sol((t0, tfi), q0, p0i) 
+
 plt = plot(solution_2000, solution_label="(direct)")
 plot(plt, flow_sol, solution_label="(indirect)")
