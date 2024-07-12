@@ -29,8 +29,6 @@ jobs:
         run: julia --project=docs/ -e 'import Pkg; Pkg.add("DifferentialEquations")'
       - name: Install MINPACK
         run: julia --project=docs/ -e 'import Pkg; Pkg.add("MINPACK")'
-      - name: Install NLPModelsIpopt
-        run: julia --project=docs/ -e 'import Pkg; Pkg.add("NLPModelsIpopt")'
       - name: Build and deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # If authenticating with GitHub Actions token
