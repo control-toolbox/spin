@@ -1,6 +1,7 @@
 using OptimalControl
 using NLPModelsIpopt
 using Plots
+using OrdinaryDiffEq
 
 include("bsat.jl")
 
@@ -55,7 +56,6 @@ u = solution_2000.control
 p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
-using DifferentialEquations
 #H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> - umax)
