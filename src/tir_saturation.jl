@@ -112,7 +112,7 @@ println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])   # auxiliary function
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ]                                 
-indirect_sol = fsolve(nle, ξ; tol=1e-6)
+indirect_sol = fsolve(nle, ξ; tol=1e-6, show_trace=true)
 
 p0i = indirect_sol.x[1:4]
 t1i = indirect_sol.x[5]
