@@ -41,7 +41,7 @@ function ocp2(q₁₀, q₂₀)
     return o
 end
 prob = ocp2([0,1], [0,1])
-solution_2000 = solve(prob, grid_size=2000, display=false, init=initial_g)
+solution_2000 = solve(prob, grid_size=2000, init=initial_g)
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
