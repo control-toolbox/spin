@@ -7,7 +7,7 @@ Let's first import the necessary packages, *OptimalControl*, *Plots* ... :
 ```@example main
 using OptimalControl
 using Plots
-using DifferentialEquations
+using OrdinaryDiffEq
 using LinearAlgebra
 using MINPACK
 using NLPModelsIpopt
