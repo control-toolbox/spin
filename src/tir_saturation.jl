@@ -55,7 +55,7 @@ u = solution_2000.control
 p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
-
+using DifferentialEquations
 #H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> - umax)
@@ -95,7 +95,7 @@ t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 p0 =p(t0) 
 tf = solution_2000.objective
-using DifferentialEquations
+
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
@@ -113,6 +113,7 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])   # auxiliary fu
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ]                                 
 indirect_sol = fsolve(nle, ξ; tol=1e-6)
+
 p0i = indirect_sol.x[1:4]
 t1i = indirect_sol.x[5]
 t2i = indirect_sol.x[6]
