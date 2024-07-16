@@ -33,7 +33,7 @@ jobs:
       ##    registry: control-toolbox/ct-registry
       - name: Install registry
         run: julia -e 'using Pkg; Pkg.Registry.add(Pkg.RegistrySpec(url="https://github.com/control-toolbox/ct-registry.git"))' 
-      ## - uses: julia-actions/julia-runtest@latest
+      - uses: julia-actions/julia-runtest@latest
       ## - uses: julia-actions/julia-uploadcodecov@latest
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      ##  env:
+      ##    CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
