@@ -1,6 +1,8 @@
 using OptimalControl
 using Plots
-
+#using HSL
+#using HSL_jll
+using NLPModelsIpopt
 
 # Define the parameters of the problem
 Γ = 9.855e-2  
@@ -57,11 +59,11 @@ end
     tf → min
 end
 ocpf = f(0.1)
-initial_g = solve(ocpu, grid_size=100)
-
+initial_g = solve(ocpu; grid_size=100, linear_solver="mumps")
+plot(initial_g)
 for i in 1:10
     global initial_g
-    solf = solve(ocpf, grid_size=i*100, init=initial_g)
+    solf = solve(ocpf, grid_size=i*100, init=initial_g, linear_solver="mumps")
     initial_g = solf
 end
 
