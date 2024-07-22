@@ -1,11 +1,12 @@
 using DifferentialEquations
+
 using LinearAlgebra: norm
 using MINPACK
 include("bsat.jl")
 
 
 ϵ = 0.1
-q0 = [0.0, 1.0, 0.0, 1.0]
+q0 = [0, 1, 0, 1]
 
 function F0i(q)
     y, z = q
@@ -41,10 +42,9 @@ function ocp2(q₁₀, q₂₀)
     end
     return o
 end
+
 prob = ocp2([0,1], [0,1])
 solution_2000 = solve(prob, grid_size=2000, init=initial_g, linear_solver="mumps")
-plot(solution_2000)
-plot(initial_g)
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
@@ -59,7 +59,7 @@ p = solution_2000.costate
 φ(t) = H1(q(t), p(t))
 umax = 1
 u0 = 0
-
+tolerances = (abstol=1e-14, reltol=1e-10)
 #H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> - umax)
@@ -121,11 +121,13 @@ println("tf = ", tf)
 
 δ = γ - Γ
 zs = γ/(2*δ)
+
 #q1[2] = zs
 #p1[2] = p1[1] * (zs / q1[1])
 #q1[4] = zs
 #p1[4] = p1[3] *(zs / q1[3])
-
+#p0[1] = -1
+#p0[3] = -1
 s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
@@ -133,7 +135,8 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                                 
 
-indirect_sol = fsolve(nle, ξ; tol=1e-6, show_trace=true)
+indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)
+
 
 p0i = indirect_sol.x[1:4]
 t1i = indirect_sol.x[5]
