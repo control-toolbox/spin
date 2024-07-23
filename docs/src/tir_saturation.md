@@ -172,6 +172,7 @@ t_l = []
 
 # Identify intervals for switching times
 while(true)
+    global i 
     if (( i == length(t13)-1) || (t13[i+1] - t13[i] > 1) )
         break
     else 

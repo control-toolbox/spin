@@ -91,6 +91,7 @@ t13 = [ elt for elt in t if abs(u(elt)) < tol]
 i = 1
 t_l = []
 while(true)
+    global i
     if (( i == length(t13)-1) || (t13[i+1] - t13[i] > 1) )
         break
     else 
