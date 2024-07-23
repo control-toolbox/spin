@@ -4,25 +4,20 @@ Previously, we attempted to solve the bi-saturation problem as mentioned in [^1]
 
 ## Direct Method : 
 Let's first import the necessary packages, *OptimalControl*, *Plots* ... : 
-
 ```@example main
 using OptimalControl
-using NLPModelsIpopt
 using Plots
 using OrdinaryDiffEq
 using LinearAlgebra
 using MINPACK
+using NLPModelsIpopt
 ```
-
 We will now define the parameters and the functions that we will use later on : 
-
 ```@example main 
 # Define the parameters of the problem
 Γ = 9.855e-2  
 γ = 3.65e-3   
 ϵ = 0.1
-q0 = [0, 1, 0, 1]
-
 function F0i(q)
     y, z = q
     res = [-Γ*y, γ*(1-z)]
@@ -56,7 +51,6 @@ function ocp(q₁₀, q₂₀)
     end
     return o
 end
-
 # Function to plot the solution of the optimal control problem
 function plot_sol(sol)
     q = sol.state
@@ -74,43 +68,36 @@ end
 ```
 
 We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. 
-
 ```@example main 
 prob = ocp([0, 1], [0, 1])
 ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
 initial_g = solve(ocp_h, grid_size=100)
 ```
-
 The provided code performs an iterative process to refine the solution. 
-
 ```@example main 
-for i ∈ 1:10
+for i in 1:10
     global initial_g
     solf = solve(prob, grid_size=i*100, init=initial_g)
     initial_g = solf
 end
 direct_sol = initial_g
 ```
-
 We will now plot the solution : 
-
 ```@example main 
 plt = plot(direct_sol, solution_label="(direct)", size=(800, 800))
 ```
-
-## Indirect Method
-
+## Indirect Method : 
 A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that **we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular** [^1]. 
 First, let's define the Hamiltonian operator.
 Since : 
 ```math
 q\dot = F_0(q) + u * F_1(q)
 ```
-then
+then : 
 ```math
 H(q,p) = p' * F_0(q) + u * p' * F_1(q)
 ``` 
-We'll note $H_0(q,p) = p' * F_0(q) $ and $H_1(q,p) = p' * F_1(q)$
+We'll note : $H_0(q,p) = p' * F_0(q) $ and $H_1(q,p) = p' * F_1(q)$
 Let $u_{+} = 1$, the positive bang control (resp. $u_{-} = -1$ the negative bang control), 
 and ```math 
 u_s(q,p) = \frac{H_{001}}{H_{101}} ``` 
@@ -187,8 +174,8 @@ i = 1
 t_l = []
 
 # Identify intervals for switching times
-while true
-    global i, t13, t_l
+while(true)
+    global i 
     if (( i == length(t13)-1) || (t13[i+1] - t13[i] > 1) )
         break
     else 
@@ -216,22 +203,56 @@ p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
 p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
 p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
 ```
-
 Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution's accuracy. 
-
 ```@example main
 # Initialize the shooting function residuals
 s = similar(p0, 32)
 
 # Compute the initial residuals for the shooting function
-## shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
-## println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
+shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
+println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
+
+```
+We define a nonlinear equation solver for the shooting method. This solver refines the initial costate and switching times to find the optimal solution using the shooting function.
+```@example main
+# Define a nonlinear equation solver for the shooting method
+nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32]) 
+ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                               
+
+# Solve the shooting equations to find the optimal times and costate
+indirect_sol = fsolve(nle, ξ; tol=1e-6, show_trace=true)
+
+```
+We extract the refined initial costate and switching times from the solution. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is smaller than the previously computed one using the direct method.
+```@example main
+# Extract the refined initial costate and switching times from the solution
+p0 = indirect_sol.x[1:4]
+t1 = indirect_sol.x[5]
+t2 = indirect_sol.x[6]
+t3 = indirect_sol.x[7]
+tf = indirect_sol.x[8]
+q1, p1, q2, p2, q3, p3 = indirect_sol.x[9:12], indirect_sol.x[13:16], indirect_sol.x[17:20], indirect_sol.x[21:24], indirect_sol.x[25:28], indirect_sol.x[29:32]
+
+# Recompute the residuals for the shooting function
+s = similar(p0, 32)
+shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
+println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
+
+```
+Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.
+```@example main
+# Define the composed flow solution using the switching times and controls
+f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
+
+# Compute the flow solution over the time interval
+flow_sol = f_sol((t0, tf), q0, p0) 
+
+# Plot the direct and indirect solutions for comparison
+plt = plot(solution_2000, solution_label="(direct)")
+plot(plt, flow_sol, solution_label="(indirect)")
 
 ```
 
-We define a nonlinear equation solver for the shooting method. This solver refines the initial costate and switching times to find the optimal solution using the shooting function.
-
-## TO BE COMPLETED
 
 ## References
 [^1]: Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.
