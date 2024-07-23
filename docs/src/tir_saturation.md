@@ -123,6 +123,9 @@ H101 = @Lie { H1, H01 }
 # Define the singular control function
 us(q, p) = -H001(q, p) / H101(q, p)
 
+#~Define the maximum control
+umax = 1
+
 # Extract the solution components
 t = solution_2000.times
 q = solution_2000.state
