@@ -1,6 +1,8 @@
 # Saturation of pair of spins : direct and indirect solutions
 
-Previously, we attempted to solve the bi-saturation problem as mentioned in [^1] using a direct method. We will now proceed to solve the same problem using an indirect method, which will require us to use the solution from the direct method as an initial guess. 
+Previously, we attempted to solve the bi-saturation problem as mentioned in [^1] using a direct method. We will now proceed to solve the same problem using an indirect method.
+
+In this analysis, we will use the solution obtained from the direct method as an integral component of the shooting method. By leveraging the direct method's results, we aim to enhance the accuracy and efficiency of the shooting method's implementation.
 
 ## Direct Method : 
 Let's first import the necessary packages, *OptimalControl*, *Plots* ... : 
@@ -139,7 +141,37 @@ fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> -umax)
 fs = Flow(prob, (q, p, tf) -> us(q, p))
 ```
-Next, we define a function to compute the shooting function for the indirect method. This function calculates the state and costate at the switching times and populates the shooting function residuals.
+Next, we define a function to compute the shooting function for the indirect method. This function calculates the state and costate at the switching times and populates the shooting function residuals based on its expression :
+```math
+S : \mathbb{R}^{32} \rightarrow \mathbb{R}^{32}
+```
+```math
+y =
+\begin{bmatrix}
+p_0 \\
+t_f \\
+t_1 \\
+t_2 \\
+t_3 \\
+z_1 \\
+z_2 \\
+z_3
+\end{bmatrix}
+\mapsto S(y) :=
+\begin{bmatrix}
+u \pm H_1(z_0) + p_0 \\
+H_1(z_1) \\
+H'_1(z_1) \\
+H_1(z_3) \\
+H'_1(z_3) \\
+y_2(t_f, t_3, z_3, u_s) \\
+z_2(t_f, t_3, z_3, u_s) \\
+(p_{z_1}(t_f, t_3, z_3, u_s) + p_{z_2}(t_f, t_3, z_3, u_s)) \gamma + p_0 \\
+z(t_1, 0, z_0, u \pm) - z_1 \\
+z(t_2, t_1, z_1, u_s) - z_2 \\
+z(t_3, t_2, z_2, u \pm) - z
+\end{bmatrix}
+```
 ```@example main 
 # Function to compute the shooting function for the indirect method
 function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
@@ -229,7 +261,9 @@ shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 
 ```
-We define a nonlinear equation solver for the shooting method. This solver refines the initial costate and switching times to find the optimal solution using the shooting function.
+The direct solution is not very accurate, as shown by the shooting function's value of about $1.11$ using the parameters from the direct method.
+
+We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.
 ```@example main
 # Define a nonlinear equation solver for the shooting method
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])   
@@ -239,7 +273,7 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:
 indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)
 
 ```
-We extract the refined initial costate and switching times from the solution. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is smaller than the previously computed one using the direct method.
+We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is $10^6$ smaller than the previously computed one using the direct method.
 ```@example main
 # Extract the refined initial costate and switching times from the solution
 p0 = indirect_sol.x[1:4]
