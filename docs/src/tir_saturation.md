@@ -91,7 +91,7 @@ A quick look on the plot of the control u, reveals that the optimal solution con
 First, let's define the Hamiltonian operator.
 Since : 
 ```math
-q\dot = F_0(q) + u * F_1(q)
+\dot q = F_0(q) + u * F_1(q)
 ```
 then : 
 ```math
@@ -99,11 +99,13 @@ H(q,p) = p' * F_0(q) + u * p' * F_1(q)
 ``` 
 We'll note : $H_0(q,p) = p' * F_0(q) $ and $H_1(q,p) = p' * F_1(q)$
 Let $u_{+} = 1$, the positive bang control (resp. $u_{-} = -1$ the negative bang control), 
-and ```math 
-u_s(q,p) = \frac{H_{001}}{H_{101}} ``` 
+and 
+```math 
+u_s(q,p) = \frac{H_{001}}{H_{101}} 
+``` 
 the singular control, where : $H_{001} ​= {H_0 ​, {H_0​, H_1​}}, H_{101} ​= {H_1​, {H_0​, H_1​}}$ and for two Hamiltonien operators $H_0​, H_1$ :  
 ```math
-{H_0, H_1}:=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)
+\{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)
 ```
 First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.
 
@@ -198,10 +200,22 @@ tf = solution_2000.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
+println("p0 = ", p0)
+println("t1 = ", t1)
+println("t2 = ", t2)
+println("t3 = ", t3)
+println("tf = ", tf)
 p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
 p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
 p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
 p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
+println("p1 = ", p1)
+println("p2 = ", p2)
+println("p3 = ", p3)
+println("q1 = ", q1)
+println("q2 = ", q2)
+println("q3 = ", q3)
+
 ```
 Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution's accuracy. 
 ```@example main
@@ -216,11 +230,11 @@ println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 We define a nonlinear equation solver for the shooting method. This solver refines the initial costate and switching times to find the optimal solution using the shooting function.
 ```@example main
 # Define a nonlinear equation solver for the shooting method
-nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32]) 
-ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                               
-
+nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])   
+ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]
 # Solve the shooting equations to find the optimal times and costate
-indirect_sol = fsolve(nle, ξ; tol=1e-6, show_trace=true)
+
+indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)
 
 ```
 We extract the refined initial costate and switching times from the solution. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is smaller than the previously computed one using the direct method.
