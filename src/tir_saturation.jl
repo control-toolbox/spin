@@ -1,9 +1,8 @@
 using DifferentialEquations
-
 using LinearAlgebra: norm
 using MINPACK
-include("bsat.jl")
 
+include("bsat.jl")
 
 ϵ = 0.1
 q0 = [0, 1, 0, 1]
