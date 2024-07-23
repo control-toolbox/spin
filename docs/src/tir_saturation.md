@@ -7,7 +7,7 @@ Let's first import the necessary packages, *OptimalControl*, *Plots* ... :
 ```@example main
 using OptimalControl
 using Plots
-using OrdinaryDiffEq
+using DifferentialEquations
 using LinearAlgebra
 using MINPACK
 using NLPModelsIpopt
@@ -84,7 +84,7 @@ direct_sol = initial_g
 ```
 We will now plot the solution : 
 ```@example main 
-plt = plot(direct_sol, solution_label="(direct)", size=(800, 800))
+plot(direct_sol, solution_label="(direct)", size=(800, 800))
 ```
 ## Indirect Method : 
 A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that **we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular** [^1]. 
@@ -110,9 +110,9 @@ the singular control, where : $H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{
 First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.
 
 ```@example main 
-# Refine the solution with a higher grid size for better accuracy
+# Refine the solution with a higher grid size for better accuracy and then plot it
 solution_2000 = solve(prob, init=initial_g; linear_solver="mumps", grid_size=2000)
-
+plt = plot(solution_2000, solution_label="(direct)", size=(800, 800))
 # Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0) 
 H1 = Lift(F1)
@@ -200,15 +200,17 @@ tf = solution_2000.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
+
+p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
+p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
+p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
+p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
+
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
 println("t3 = ", t3)
 println("tf = ", tf)
-p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
-p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
-p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
-p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
 println("p1 = ", p1)
 println("p2 = ", p2)
 println("p3 = ", p3)
