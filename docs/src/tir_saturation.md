@@ -188,8 +188,9 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 
-# Extract initial costate,  and final time
+# Extract initial and intermediate costates and states and final time
 p0 = p(t0) 
+q0 = [0, 1, 0, 1]
 tf = solution_2000.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
