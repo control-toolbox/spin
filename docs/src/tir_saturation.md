@@ -71,13 +71,13 @@ We will use the same technique used before to solve the problem which involves u
 ```@example main 
 prob = ocp([0, 1], [0, 1])
 ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
-initial_g = solve(ocp_h, grid_size=100)
+initial_g = solve(ocp_h; linear_solver="mumps", grid_size=100)
 ```
 The provided code performs an iterative process to refine the solution. 
 ```@example main 
 for i in 1:10
     global initial_g
-    solf = solve(prob, grid_size=i*100, init=initial_g)
+    solf = solve(prob, init=initial_g; linear_solver="mumps", grid_size=i*100)
     initial_g = solf
 end
 direct_sol = initial_g
@@ -101,9 +101,9 @@ We'll note : $H_0(q,p) = p' * F_0(q) $ and $H_1(q,p) = p' * F_1(q)$
 Let $u_{+} = 1$, the positive bang control (resp. $u_{-} = -1$ the negative bang control), 
 and 
 ```math 
-u_s(q,p) = \frac{H_{001}}{H_{101}} 
+u_s(q,p) = - \frac{H_{001}}{H_{101}} 
 ``` 
-the singular control, where : $H_{001} ​= {H_0 ​, {H_0​, H_1​}}, H_{101} ​= {H_1​, {H_0​, H_1​}}$ and for two Hamiltonien operators $H_0​, H_1$ :  
+the singular control, where : $H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{101} ​= \{H_1​, \{H_0​, H_1\​}\}$ and for two Hamiltonien operators $H_0​, H_1$ :  
 ```math
 \{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)
 ```
@@ -111,7 +111,7 @@ First, we refine the solution with a higher grid size for better accuracy. We al
 
 ```@example main 
 # Refine the solution with a higher grid size for better accuracy
-solution_2000 = solve(prob, grid_size=2000, display=false, init=initial_g)
+solution_2000 = solve(prob, init=initial_g; linear_solver="mumps", grid_size=2000)
 
 # Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0) 
