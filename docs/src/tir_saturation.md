@@ -137,14 +137,11 @@ fs = Flow(prob, (q, p, tf) -> us(q, p))
 Next, we define a function to compute the shooting function for the indirect method. This function calculates the state and costate at the switching times and populates the shooting function residuals.
 ```@example main 
 # Function to compute the shooting function for the indirect method
-function shoot!(s, p0, t1, t2, t3, tf)
-    # Compute the state and costate at the switching times
-    q1, p1 = fₘ(0, q0, p0, t1)
-    q2, p2 = fs(t1, q1, p1, t2)
-    q3, p3 = fₚ(t2, q2, p2, t3)
+function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
+    qi1, pi1 = fₘ(0, q0, p0, t1)
+    qi2, pi2 = fs(t1, q1, p1, t2)
+    qi3, pi3 = fₚ(t2, q2, p2, t3)
     qf, pf = fs(t3, q3, p3, tf)
-
-    # Populate the shooting function residuals
     s[1] = H0(q0, p0) - umax * H1(q0, p0) - 1  
     s[2] = H1(q1, p1)
     s[3] = H01(q1, p1)
@@ -153,8 +150,13 @@ function shoot!(s, p0, t1, t2, t3, tf)
     s[6] = qf[3]
     s[7] = qf[4]
     s[8] = (pf[2] + pf[4]) * γ - 1
+    s[9:12] = qi1 - q1
+    s[13:16] = pi1 - p1
+    s[17:20] = qi2 - q2
+    s[21:24] = pi2 - p2
+    s[25:28] = qi3 - q3
+    s[29:32] = pi3 - p3
 end
-
 ```
 We then initialize parameters to find the switching times. We identify the intervals where the control is near zero, indicating singular control, and determine the switching times.
 
@@ -185,29 +187,35 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 
-# Extract initial costate and final time
+# Extract initial costate,  and final time
 p0 = p(t0) 
 tf = solution_2000.objective
-
+q1, p1 = q(t1), p(t1)
+q2, p2 = q(t2), p(t2)
+q3, p3 = q(t3), p(t3)
+p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
+p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
+p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
+p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
 ```
 Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution's accuracy. 
 ```@example main
 # Initialize the shooting function residuals
-s = similar(p0, 8)
+s = similar(p0, 32)
 
 # Compute the initial residuals for the shooting function
-shoot!(s, p0, t1, t2, t3, tf)
+shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 
 ```
 We define a nonlinear equation solver for the shooting method. This solver refines the initial costate and switching times to find the optimal solution using the shooting function.
 ```@example main
 # Define a nonlinear equation solver for the shooting method
-nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8])
-ξ = [p0; t1; t2; t3; tf]                                 
+nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32]) 
+ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                               
 
 # Solve the shooting equations to find the optimal times and costate
-indirect_sol = fsolve(nle, ξ; tol=1e-6)
+indirect_sol = fsolve(nle, ξ; tol=1e-6, show_trace=true)
 
 ```
 We extract the refined initial costate and switching times from the solution. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is smaller than the previously computed one using the direct method.
@@ -218,20 +226,21 @@ t1 = indirect_sol.x[5]
 t2 = indirect_sol.x[6]
 t3 = indirect_sol.x[7]
 tf = indirect_sol.x[8]
+q1, p1, q2, p2, q3, p3 = indirect_sol.x[9:12], indirect_sol.x[13:16], indirect_sol.x[17:20], indirect_sol.x[21:24], indirect_sol.x[25:28], indirect_sol.x[29:32]
 
 # Recompute the residuals for the shooting function
-s = similar(p0, 8)
-shoot!(s, p0, t1, t2, t3, tf)
+s = similar(p0, 32)
+shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
 
 ```
 Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.
 ```@example main
 # Define the composed flow solution using the switching times and controls
-f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs)
+f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
 
 # Compute the flow solution over the time interval
-flow_sol = f_sol((t0, tfi), q0, p0i) 
+flow_sol = f_sol((t0, tf), q0, p0) 
 
 # Plot the direct and indirect solutions for comparison
 plt = plot(solution_2000, solution_label="(direct)")
