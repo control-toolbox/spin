@@ -1,5 +1,4 @@
 using Documenter
-using OptimalControl
 
 makedocs(;
     warnonly = [:cross_references, :autodocs_block],
@@ -7,8 +6,8 @@ makedocs(;
     format = Documenter.HTML(prettyurls = false),
     pages = [
         "Introduction" => "index.md",
-        "Bisaturation" => "bisaturation.md",
-        "BisaturationIndirect" => "tir_saturation.md",
+        "Bi-saturation (direct)" => "bisaturation.md",
+        "Bi-saturation (indirect)" => "tir_saturation.md",
     ],
     checkdocs=:none,
 )
