@@ -73,20 +73,13 @@ We will use the same technique used before to solve the problem which involves u
 ```@example main 
 prob = ocp([0, 1], [0, 1])
 ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
-initial_g = solve(ocp_h; linear_solver="mumps", grid_size=100)
+initial_g = solve(ocp_h; grid_size=1000, linear_solver="mumps")
+direct_sol = solve(prob; grid_size=1000, init=initial_g, linear_solver="mumps")
 ```
-The provided code performs an iterative process to refine the solution. 
-```@example main 
-for i in 1:10
-    global initial_g
-    solf = solve(prob, init=initial_g; linear_solver="mumps", grid_size=i*100)
-    initial_g = solf
-end
-direct_sol = initial_g
-```
+
 We will now plot the solution : 
 ```@example main 
-plot(direct_sol, solution_label="(direct)", size=(800, 800))
+plt = plot(direct_sol, solution_label="(direct)")
 ```
 ## Indirect Method : 
 A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that **we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular** [^1]. 
@@ -112,9 +105,7 @@ the singular control, where : $H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{
 First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.
 
 ```@example main 
-# Refine the solution with a higher grid size for better accuracy and then plot it
-solution_2000 = solve(prob, init=initial_g; linear_solver="mumps", grid_size=2000)
-plt = plot(solution_2000, solution_label="(direct)", size=(800, 800))
+
 # Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0) 
 H1 = Lift(F1)
@@ -131,10 +122,10 @@ us(q, p) = -H001(q, p) / H101(q, p)
 umax = 1
 
 # Extract the solution components
-t = solution_2000.times
-q = solution_2000.state
-u = solution_2000.control
-p = solution_2000.costate
+t = direct_sol.times
+q = direct_sol.state
+u = direct_sol.control
+p = direct_sol.costate
 
 # Define the flows for maximum, minimum, and singular controls
 fₚ = Flow(prob, (q, p, tf) -> umax)
@@ -228,16 +219,19 @@ t3 = min(t3f...)
 # Extract initial and intermediate costates and states and final time
 p0 = p(t0) 
 q0 = [0, 1, 0, 1]
-tf = solution_2000.objective
+tf = direct_sol.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
+δ = γ - Γ
+zs = γ/(2*δ)
 
-p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
-p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
-p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
-p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
-
+q1[2] = zs
+p1[2] = p1[1] * (zs / q1[1])
+q1[4] = zs
+p1[4] = p1[3] *(zs / q1[3])
+p0[1] = -1
+p0[3] = -1
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
@@ -270,7 +264,7 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]
 # Solve the shooting equations to find the optimal times and costate
 
-indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)
+indirect_sol = fsolve(nle, ξ; show_trace=true)
 
 ```
 We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is $10^6$ smaller than the previously computed one using the direct method.
@@ -298,7 +292,7 @@ f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
 flow_sol = f_sol((t0, tf), q0, p0) 
 
 # Plot the direct and indirect solutions for comparison
-plt = plot(solution_2000, solution_label="(direct)")
+
 plot(plt, flow_sol, solution_label="(indirect)")
 
 ```

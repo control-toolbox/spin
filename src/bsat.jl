@@ -59,14 +59,10 @@ end
     tf → min
 end
 ocpf = f(0.1)
-initial_g = solve(ocpu; grid_size=100, linear_solver="mumps")
+initial_g = solve(ocpu; grid_size=1000, linear_solver="mumps")
 plot(initial_g)
-for i in 1:10
-    global initial_g
-    solf = solve(ocpf, grid_size=i*100, init=initial_g, linear_solver="mumps")
-    initial_g = solf
-end
+solf = solve(ocpf, grid_size=1000, init=initial_g, linear_solver="mumps")
 
 # Plot the figures
-plot_sol(initial_g)
+plot_sol(solf)
 # Conclusion: This solution seems to be the optimal one.

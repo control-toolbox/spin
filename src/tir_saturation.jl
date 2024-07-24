@@ -4,6 +4,7 @@ using MINPACK
 
 include("bsat.jl")
 
+
 ϵ = 0.1
 q0 = [0, 1, 0, 1]
 
@@ -43,7 +44,8 @@ function ocp2(q₁₀, q₂₀)
 end
 
 prob = ocp2([0,1], [0,1])
-solution_2000 = solve(prob, grid_size=2000, init=initial_g, linear_solver="mumps")
+#solution_2000 = solve(prob, grid_size=2000, init=solf, linear_solver="mumps")
+#plot(solution_2000)
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
@@ -51,18 +53,17 @@ H001 = @Lie { H0, H01 }
 H101 = @Lie { H1, H01 }
 us(q, p) = -H001(q, p) / H101(q, p)
 
-t = solution_2000.times
-q = solution_2000.state
-u = solution_2000.control
-p = solution_2000.costate
-φ(t) = H1(q(t), p(t))
+t = solf.times
+q = solf.state
+u = solf.control
+p = solf.costate
+#φ(t) = H1(q(t), p(t))
 umax = 1
 u0 = 0
-tolerances = (abstol=1e-14, reltol=1e-10)
+#tolerances = (abstol=1e-14, reltol=1e-10)
 #H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(prob, (q, p, tf) -> umax)
 fₘ = Flow(prob, (q, p, tf) -> - umax)
-f0 = Flow(prob, (q, p, tf) -> u0)
 fs = Flow(prob, (q, p, tf) -> us(q, p))
 
 function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
@@ -105,14 +106,14 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 p0 = p(t0) 
-tf = solution_2000.objective
+tf = solf.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
-p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
-p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
-p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
-p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
+#p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
+#p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
+#p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
+#p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
@@ -122,12 +123,12 @@ println("tf = ", tf)
 δ = γ - Γ
 zs = γ/(2*δ)
 
-#q1[2] = zs
-#p1[2] = p1[1] * (zs / q1[1])
-#q1[4] = zs
-#p1[4] = p1[3] *(zs / q1[3])
-#p0[1] = -1
-#p0[3] = -1
+q1[2] = zs
+p1[2] = p1[1] * (zs / q1[1])
+q1[4] = zs
+p1[4] = p1[3] *(zs / q1[3])
+p0[1] = -1
+p0[3] = -1
 s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
@@ -135,7 +136,7 @@ nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                                 
 
-indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)
+indirect_sol = fsolve(nle, ξ; show_trace=true)
 
 
 p0i = indirect_sol.x[1:4]
@@ -158,5 +159,5 @@ println("Norm of the shooting function: ‖si‖ = ", norm(si), "\n")
 f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs)
 flow_sol = f_sol((t0, tfi), q0, p0i) 
 
-plt = plot(solution_2000, solution_label="(direct)")
+plt = plot(solf, solution_label="(direct)")
 plot(plt, flow_sol, solution_label="(indirect)")
