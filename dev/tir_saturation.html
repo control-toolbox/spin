@@ -56,15 +56,8 @@ function plot_sol(sol)
     )
 end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_sol (generic function with 1 method)</code></pre><p>We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. </p><pre><code class="language-julia hljs">prob = ocp([0, 1], [0, 1])
 ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
-initial_g = solve(ocp_h; linear_solver=&quot;mumps&quot;, grid_size=100)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>The provided code performs an iterative process to refine the solution. </p><pre><code class="language-julia hljs">for i in 1:10
-    global initial_g
-    solf = solve(prob, init=initial_g; linear_solver=&quot;mumps&quot;, grid_size=i*100)
-    initial_g = solf
-end
-direct_sol = initial_g</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We will now plot the solution : </p><pre><code class="language-julia hljs">plot(direct_sol, solution_label=&quot;(direct)&quot;, size=(800, 800))</code></pre><img src="tir_saturation-fd30bc6c.svg" alt="Example block output"/><h2 id="Indirect-Method-:"><a class="docs-heading-anchor" href="#Indirect-Method-:">Indirect Method :</a><a id="Indirect-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Indirect-Method-:" title="Permalink"></a></h2><p>A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that <strong>we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular</strong> <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>.  First, let&#39;s define the Hamiltonian operator. Since : </p><p class="math-container">\[\dot q = F_0(q) + u * F_1(q)\]</p><p>then : </p><p class="math-container">\[H(q,p) = p&#39; * F_0(q) + u * p&#39; * F_1(q)\]</p><p>We&#39;ll note : <span>$H_0(q,p) = p&#39; * F_0(q) $ and $H_1(q,p) = p&#39; * F_1(q)$</span> Let <span>$u_{+} = 1$</span>, the positive bang control (resp. <span>$u_{-} = -1$</span> the negative bang control),  and </p><p class="math-container">\[u_s(q,p) = - \frac{H_{001}}{H_{101}} \]</p><p>the singular control, where : <span>$H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{101} ​= \{H_1​, \{H_0​, H_1\​}\}$</span> and for two Hamiltonien operators <span>$H_0​, H_1$</span> :  </p><p class="math-container">\[\{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)\]</p><p>First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.</p><pre><code class="language-julia hljs"># Refine the solution with a higher grid size for better accuracy and then plot it
-solution_2000 = solve(prob, init=initial_g; linear_solver=&quot;mumps&quot;, grid_size=2000)
-plt = plot(solution_2000, solution_label=&quot;(direct)&quot;, size=(800, 800))
-# Lift the vector fields to their Hamiltonian counterparts
+initial_g = solve(ocp_h; grid_size=1000, linear_solver=&quot;mumps&quot;)
+direct_sol = solve(prob; grid_size=1000, init=initial_g, linear_solver=&quot;mumps&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We will now plot the solution : </p><pre><code class="language-julia hljs">plt = plot(direct_sol, solution_label=&quot;(direct)&quot;)</code></pre><img src="tir_saturation-a1ab6c63.svg" alt="Example block output"/><h2 id="Indirect-Method-:"><a class="docs-heading-anchor" href="#Indirect-Method-:">Indirect Method :</a><a id="Indirect-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Indirect-Method-:" title="Permalink"></a></h2><p>A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that <strong>we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular</strong> <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>.  First, let&#39;s define the Hamiltonian operator. Since : </p><p class="math-container">\[\dot q = F_0(q) + u * F_1(q)\]</p><p>then : </p><p class="math-container">\[H(q,p) = p&#39; * F_0(q) + u * p&#39; * F_1(q)\]</p><p>We&#39;ll note : <span>$H_0(q,p) = p&#39; * F_0(q) $ and $H_1(q,p) = p&#39; * F_1(q)$</span> Let <span>$u_{+} = 1$</span>, the positive bang control (resp. <span>$u_{-} = -1$</span> the negative bang control),  and </p><p class="math-container">\[u_s(q,p) = - \frac{H_{001}}{H_{101}} \]</p><p>the singular control, where : <span>$H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{101} ​= \{H_1​, \{H_0​, H_1\​}\}$</span> and for two Hamiltonien operators <span>$H_0​, H_1$</span> :  </p><p class="math-container">\[\{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)\]</p><p>First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.</p><pre><code class="language-julia hljs"># Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0)
 H1 = Lift(F1)
 
@@ -80,10 +73,10 @@ us(q, p) = -H001(q, p) / H101(q, p)
 umax = 1
 
 # Extract the solution components
-t = solution_2000.times
-q = solution_2000.state
-u = solution_2000.control
-p = solution_2000.costate
+t = direct_sol.times
+q = direct_sol.state
+u = direct_sol.control
+p = direct_sol.costate
 
 # Define the flows for maximum, minimum, and singular controls
 fₚ = Flow(prob, (q, p, tf) -&gt; umax)
@@ -191,16 +184,19 @@ t3 = min(t3f...)
 # Extract initial and intermediate costates and states and final time
 p0 = p(t0)
 q0 = [0, 1, 0, 1]
-tf = solution_2000.objective
+tf = direct_sol.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
+δ = γ - Γ
+zs = γ/(2*δ)
 
-p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
-p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
-p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
-p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
-
+q1[2] = zs
+p1[2] = p1[1] * (zs / q1[1])
+q1[4] = zs
+p1[4] = p1[3] *(zs / q1[3])
+p0[1] = -1
+p0[3] = -1
 println(&quot;p0 = &quot;, p0)
 println(&quot;t1 = &quot;, t1)
 println(&quot;t2 = &quot;, t2)
@@ -211,41 +207,39 @@ println(&quot;p2 = &quot;, p2)
 println(&quot;p3 = &quot;, p3)
 println(&quot;q1 = &quot;, q1)
 println(&quot;q2 = &quot;, q2)
-println(&quot;q3 = &quot;, q3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">p0 = [1.968383560336647, -2.683692907466549, -1.1803810797798746, -7.176679681378337]
-t1 = 1.8130555753978281
-t2 = 9.580096126793462
-t3 = 13.116673668927497
-tf = 44.76680433081057
-p1 = [-3.2067039050168398, -1.4316659011815034, -7.956137909735359, 1.8021258736574164]
-p2 = [-6.991481857716248, -1.2139257627069924, -16.97332743064174, 2.424325222362661]
-p3 = [7.558507058306593, 4.145079552523258, 20.35037615948182, -3.0629744814364352]
-q1 = [0.8969201946962829, -0.13457054048880976, 0.9147640412814327, 0.032421449024528114]
-q2 = [0.4122990039199879, -0.13217669121849873, 0.42655420210443407, 0.03240827239012222]
-q3 = [-0.3615752273548799, -0.00949384631677018, -0.36298635967748877, -0.023253682915612892]</code></pre><p>Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution&#39;s accuracy. </p><pre><code class="language-julia hljs"># Initialize the shooting function residuals
+println(&quot;q3 = &quot;, q3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">p0 = [-1.0, -2.708879270644842, -1.0, -7.1610250181319]
+t1 = 1.8355505720649208
+t2 = 9.580678595655927
+t3 = 13.117471161341992
+tf = 44.76952614792489
+p1 = [-3.2218343311008915, 0.06921606515357917, -7.978635723021344, 0.1680727865624547]
+p2 = [-7.009088822959361, -1.2229293654698654, -16.984887155507888, 2.430565502716156]
+p3 = [7.575108239294266, 4.157062857684455, 20.362702530914923, -3.0729745200803165]
+q1 = [0.8951441025099521, -0.019230769230769232, 0.912909849976097, -0.019230769230769232]
+q2 = [0.412399148637373, -0.13205104396218456, 0.42660613534261055, 0.032522960820251696]
+q3 = [-0.36163875910093074, -0.00970029689409695, -0.3630413030108652, -0.02344127034729294]</code></pre><p>Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution&#39;s accuracy. </p><pre><code class="language-julia hljs"># Initialize the shooting function residuals
 s = similar(p0, 32)
 
 # Compute the initial residuals for the shooting function
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println(&quot;Norm of the shooting function: ‖s‖ = &quot;, norm(s), &quot;\n&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">┌ Warning: Using arrays or dicts to store parameters of different types can hurt performance.
 │ Consider using tuples instead.
-└ @ SciMLBase ~/.julia/packages/SciMLBase/n3SyK/src/performance_warnings.jl:33
-┌ Warning: At t=39.530922799734995, dt was forced below floating point epsilon 7.105427357601002e-15, and step error estimate = 336.0731230405958. Aborting. There is either an error in your model specification or the true solution is unstable (or the true solution can not be represented in the precision of Float64).
-└ @ SciMLBase ~/.julia/packages/SciMLBase/n3SyK/src/integrator_interface.jl:600
-Norm of the shooting function: ‖s‖ = 1.109019694739302</code></pre><p>The direct solution is not very accurate, as shown by the shooting function&#39;s value of about <span>$1.11$</span> using the parameters from the direct method.</p><p>We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.</p><pre><code class="language-julia hljs"># Define a nonlinear equation solver for the shooting method
+└ @ SciMLBase ~/.julia/packages/SciMLBase/jh7eV/src/performance_warnings.jl:33
+Norm of the shooting function: ‖s‖ = 4.752588987331594</code></pre><p>The direct solution is not very accurate, as shown by the shooting function&#39;s value of about <span>$1.11$</span> using the parameters from the direct method.</p><p>We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.</p><pre><code class="language-julia hljs"># Define a nonlinear equation solver for the shooting method
 nle = (s, ξ) -&gt; shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]
 # Solve the shooting equations to find the optimal times and costate
 
-indirect_sol = fsolve(nle, ξ; show_trace=true , tol=1e-6)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Results of Nonlinear Solver Algorithm
+indirect_sol = fsolve(nle, ξ; show_trace=true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Results of Nonlinear Solver Algorithm
  * Algorithm: Modified Powell
- * Starting Point: [1.968383560336647, -2.683692907466549, -1.1803810797798746, -7.176679681378337, 1.8130555753978281, 9.580096126793462, 13.116673668927497, 44.76680433081057, 0.8969201946962829, -0.13457054048880976, 0.9147640412814327, 0.032421449024528114, -3.2067039050168398, -1.4316659011815034, -7.956137909735359, 1.8021258736574164, 0.4122990039199879, -0.13217669121849873, 0.42655420210443407, 0.03240827239012222, -6.991481857716248, -1.2139257627069924, -16.97332743064174, 2.424325222362661, -0.3615752273548799, -0.00949384631677018, -0.36298635967748877, -0.023253682915612892, 7.558507058306593, 4.145079552523258, 20.35037615948182, -3.0629744814364352]
- * Zero: [2.4386471449899254, -2.5449963687305024, -1.6897572171589104, -7.231929319511844, 1.7725155428642607, 10.24248084079377, 13.739036676848956, 9922.870895830605, 0.896657153436109, -0.1361475407914288, 0.914708933370698, 0.030727944982581575, -3.1424826073924983, -1.9627516538821248, -8.019873750770973, 2.3873158139094914, 0.38503360956922517, -0.13232882611443053, 0.39978831281665733, 0.03140072682511751, -7.319061054095933, -1.7324409858285816, -18.165453418079107, 3.118713967256021, -0.3127529983250676, -0.028390124088574404, -0.34011253160653915, -0.011187524743349823, 7.676833682009039, 4.9191492211564185, 21.81788936032515, -3.6959403502684025]
- * Inf-norm of residuals: 0.216770
+ * Starting Point: [-1.0, -2.708879270644842, -1.0, -7.1610250181319, 1.8355505720649208, 9.580678595655927, 13.117471161341992, 44.76952614792489, 0.8951441025099521, -0.019230769230769232, 0.912909849976097, -0.019230769230769232, -3.2218343311008915, 0.06921606515357917, -7.978635723021344, 0.1680727865624547, 0.412399148637373, -0.13205104396218456, 0.42660613534261055, 0.032522960820251696, -7.009088822959361, -1.2229293654698654, -16.984887155507888, 2.430565502716156, -0.36163875910093074, -0.00970029689409695, -0.3630413030108652, -0.02344127034729294, 7.575108239294266, 4.157062857684455, 20.362702530914923, -3.0729745200803165]
+ * Zero: [1.9971623765999449, -2.66060097926912, -1.1079581963159304, -7.188789937714131, 1.7720540178027837, 9.603050124408712, 13.089120969125126, 44.76589299744697, 0.900503814653987, -0.13459664443340263, 0.9184051114736804, 0.03240952892023857, -3.1893425511298337, -1.4334049319589293, -7.91675637584791, 1.8016025646786877, 0.41131725822796966, -0.13214505694912868, 0.42556726264485, 0.03243112124512384, -6.99833351439065, -1.2157884328980755, -16.995374198404868, 2.4250215610805177, -0.36252855218625507, -0.00948189492928248, -0.3639479818295994, -0.023253522268119897, 7.529542645543143, 4.14279822427816, 20.274828208040475, -3.071785919522845]
+ * Inf-norm of residuals: 0.000000
  * Convergence: false
  * Message: iteration is not making good progress
- * Total time: 141.443351 seconds
- * Function Calls: 29
- * Jacobian Calls (df/dx): 8</code></pre><p>We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of <em>s</em> in this case is <span>$10^6$</span> smaller than the previously computed one using the direct method.</p><pre><code class="language-julia hljs"># Extract the refined initial costate and switching times from the solution
+ * Total time: 161.759214 seconds
+ * Function Calls: 150
+ * Jacobian Calls (df/dx): 16</code></pre><p>We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of <em>s</em> in this case is <span>$10^6$</span> smaller than the previously computed one using the direct method.</p><pre><code class="language-julia hljs"># Extract the refined initial costate and switching times from the solution
 p0 = indirect_sol.x[1:4]
 t1 = indirect_sol.x[5]
 t2 = indirect_sol.x[6]
@@ -258,15 +252,13 @@ s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println(&quot;Norm of the shooting function: ‖s‖ = &quot;, norm(s), &quot;\n&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">┌ Warning: Using arrays or dicts to store parameters of different types can hurt performance.
 │ Consider using tuples instead.
-└ @ SciMLBase ~/.julia/packages/SciMLBase/n3SyK/src/performance_warnings.jl:33
-┌ Warning: At t=100.46470821028124, dt was forced below floating point epsilon 1.4210854715202004e-14, and step error estimate = 17.47041826970698. Aborting. There is either an error in your model specification or the true solution is unstable (or the true solution can not be represented in the precision of Float64).
-└ @ SciMLBase ~/.julia/packages/SciMLBase/n3SyK/src/integrator_interface.jl:600
-Norm of the shooting function: ‖s‖ = 0.3541048503432239</code></pre><p>Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.</p><pre><code class="language-julia hljs"># Define the composed flow solution using the switching times and controls
+└ @ SciMLBase ~/.julia/packages/SciMLBase/jh7eV/src/performance_warnings.jl:33
+Norm of the shooting function: ‖s‖ = 2.0032658917625174e-8</code></pre><p>Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.</p><pre><code class="language-julia hljs"># Define the composed flow solution using the switching times and controls
 f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
 
 # Compute the flow solution over the time interval
 flow_sol = f_sol((t0, tf), q0, p0)
 
 # Plot the direct and indirect solutions for comparison
-plt = plot(solution_2000, solution_label=&quot;(direct)&quot;)
-plot(plt, flow_sol, solution_label=&quot;(indirect)&quot;)</code></pre><img src="tir_saturation-0951d21a.svg" alt="Example block output"/><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="bisaturation.html">« Bi-saturation (direct)</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Tuesday 23 July 2024 15:14">Tuesday 23 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+
+plot(plt, flow_sol, solution_label=&quot;(indirect)&quot;)</code></pre><img src="tir_saturation-20b3ad0f.svg" alt="Example block output"/><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="bisaturation.html">« Bi-saturation (direct)</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Wednesday 24 July 2024 09:31">Wednesday 24 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
