@@ -7,51 +7,53 @@ In this analysis, we will use the solution obtained from the direct method as an
 ## Direct Method : 
 Let's first import the necessary packages, *OptimalControl*, *Plots* ... : 
 ```@example main
+using OrdinaryDiffEq
+using LinearAlgebra: norm
+using MINPACK
 using OptimalControl
 using Plots
-using DifferentialEquations
-using LinearAlgebra
-using MINPACK
 using NLPModelsIpopt
 ```
 We will now define the parameters and the functions that we will use later on : 
 ```@example main 
-# Define the parameters of the problem
+# Define the parameters of the problem and the starting point
 Γ = 9.855e-2  
-γ = 3.65e-3   
+γ = 3.65e-3  
 ϵ = 0.1
-function F0i(q)
-    y, z = q
-    res = [-Γ*y, γ*(1-z)]
-    return res
+q0 = [0, 1, 0, 1]
+
+@def ocp1 begin
+    tf ∈ R, variable 
+    t ∈ [0, tf], time 
+    x ∈ R⁴, state    
+    u ∈ R, control    
+    tf ≥ 0            
+    -1 ≤ u(t) ≤ 1     
+    x(0) == [0, 1, 0, 1]
+    x(tf) == [0, 0, 0, 0] 
+    
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min 
 end
 
-function F1i(q)
-    y, z = q
-    res = [-z, y]
-    return res
-end
-
-F0(q) = [ F0i(q[1:2]); F0i(q[3:4]) ]
-F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
-function ocp(q₁₀, q₂₀)
-    @def o begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        qᵢ₁ = [y₁, z₁]
-        qᵢ₂ = [y₂, z₂]
-        qᵢ₁(0) == q₁₀
-        qᵢ₂(0) == q₂₀
-        qᵢ₁(tf) == [0, 0]
-        qᵢ₂(tf) == [0, 0]
-        q̇(t) == F0(q(t)) + u(t) * F1(q(t))
-        tf → min
-    end
-    return o
+@def ocp2 begin
+    tf ∈ R, variable 
+    t ∈ [0, tf], time 
+    x ∈ R⁴, state    
+    u ∈ R, control    
+    tf ≥ 0            
+    -1 ≤ u(t) ≤ 1     
+    x(0) == [0.1, 0.9, 0.1, 0.9]
+    x(tf) == [0, 0, 0, 0] 
+    
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min 
 end
 # Function to plot the solution of the optimal control problem
 function plot_sol(sol)
@@ -67,14 +69,29 @@ function plot_sol(sol)
         plot(sol.times, sol.control, xlabel="Time", ylabel="Control")
     )
 end
+
+
+function F0i(q)
+    y, z = q
+    res = [-Γ*y, γ*(1-z)]
+    return res
+end
+
+function F1i(q)
+    y, z = q
+    res = [-z, y]
+    return res
+end
+
+F0(q) = [ F0i(q[1:2]); F0i(q[3:4]) ]
+F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
 ```
 
 We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. 
 ```@example main 
-prob = ocp([0, 1], [0, 1])
-ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
-initial_g = solve(ocp_h; grid_size=1000, linear_solver="mumps")
-direct_sol = solve(prob; grid_size=1000, init=initial_g, linear_solver="mumps")
+initial_g = solve(ocp2; grid_size=1000, linear_solver="mumps")
+direct_sol = solve(ocp1; grid_size=1000, init=initial_g, linear_solver="mumps")
+
 ```
 
 We will now plot the solution : 
@@ -218,7 +235,7 @@ t3 = min(t3f...)
 
 # Extract initial and intermediate costates and states and final time
 p0 = p(t0) 
-q0 = [0, 1, 0, 1]
+
 tf = direct_sol.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)

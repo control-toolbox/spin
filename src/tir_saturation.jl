@@ -1,12 +1,64 @@
-using DifferentialEquations
+using OrdinaryDiffEq
 using LinearAlgebra: norm
 using MINPACK
+using OptimalControl
+using Plots
+using NLPModelsIpopt
 
-include("bsat.jl")
-
-
+# Define the parameters of the problem
+Γ = 9.855e-2  
+γ = 3.65e-3  
 ϵ = 0.1
 q0 = [0, 1, 0, 1]
+# Define the optimal control problem with parameter ϵ₀
+
+@def ocp1 begin
+    tf ∈ R, variable 
+    t ∈ [0, tf], time 
+    x ∈ R⁴, state    
+    u ∈ R, control    
+    tf ≥ 0            
+    -1 ≤ u(t) ≤ 1     
+    x(0) == [0, 1, 0, 1]
+    x(tf) == [0, 0, 0, 0] 
+    
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min 
+end
+
+@def ocp2 begin
+    tf ∈ R, variable 
+    t ∈ [0, tf], time 
+    x ∈ R⁴, state    
+    u ∈ R, control    
+    tf ≥ 0            
+    -1 ≤ u(t) ≤ 1     
+    x(0) == [0.1, 0.9, 0.1, 0.9]
+    x(tf) == [0, 0, 0, 0] 
+    
+    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
+                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min 
+end
+# Function to plot the solution of the optimal control problem
+function plot_sol(sol)
+    q = sol.state
+    liste = [q(t) for t in sol.times]
+    liste_y1 = [elt[1] for elt in liste]
+    liste_z1 = [elt[2] for elt in liste]
+    liste_y2 = [elt[3] for elt in liste]
+    liste_z2 = [elt[4] for elt in liste]
+    plot(
+        plot(liste_y1, liste_z1, xlabel="y1", ylabel="z1"),
+        plot(liste_y2, liste_z2, xlabel="y2", ylabel="z2"),
+        plot(sol.times, sol.control, xlabel="Time", ylabel="Control")
+    )
+end
 
 function F0i(q)
     y, z = q
@@ -23,29 +75,10 @@ end
 
 F0(q) = [ F0i(q[1:2]); F0i(q[3:4]) ]
 F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
-function ocp2(q₁₀, q₂₀)
-    @def o begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        qᵢ₁ = [y₁, z₁]
-        qᵢ₂ = [y₂, z₂]
-        qᵢ₁(0) == q₁₀
-        qᵢ₂(0) == q₂₀
-        qᵢ₁(tf) == [0, 0]
-        qᵢ₂(tf) == [0, 0]
-        q̇(t) == F0(q(t)) + u(t) * F1(q(t))
-        tf → min
-    end
-    return o
-end
 
-prob = ocp2([0,1], [0,1])
-#solution_2000 = solve(prob, grid_size=2000, init=solf, linear_solver="mumps")
-#plot(solution_2000)
+initial_g = solve(ocp2; grid_size=1000, linear_solver="mumps")
+solution = solve(ocp1; grid_size=1000, init=initial_g, linear_solver="mumps")
+
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
@@ -53,18 +86,18 @@ H001 = @Lie { H0, H01 }
 H101 = @Lie { H1, H01 }
 us(q, p) = -H001(q, p) / H101(q, p)
 
-t = solf.times
-q = solf.state
-u = solf.control
-p = solf.costate
+t = solution.times
+q = solution.state
+u = solution.control
+p = solution.costate
 #φ(t) = H1(q(t), p(t))
 umax = 1
 u0 = 0
 #tolerances = (abstol=1e-14, reltol=1e-10)
 #H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
-fₚ = Flow(prob, (q, p, tf) -> umax)
-fₘ = Flow(prob, (q, p, tf) -> - umax)
-fs = Flow(prob, (q, p, tf) -> us(q, p))
+fₚ = Flow(ocp1, (q, p, tf) -> umax)
+fₘ = Flow(ocp1, (q, p, tf) -> - umax)
+fs = Flow(ocp1, (q, p, tf) -> us(q, p))
 
 function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
     qi1, pi1 = fₘ(0, q0, p0, t1)
@@ -106,7 +139,7 @@ t2 = max(t_l...)
 t3f = [elt for elt in t13 if elt > t2]
 t3 = min(t3f...)
 p0 = p(t0) 
-tf = solf.objective
+tf = solution.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
@@ -132,6 +165,7 @@ p0[3] = -1
 s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
+plot(solution)
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])   # auxiliary function
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                                 
@@ -156,8 +190,8 @@ println("tf = ", tfi)
 si = similar(p0i, 32)
 shoot!(si, p0i, t1i, t2i, t3i, tfi,q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖si‖ = ", norm(si), "\n")
-f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs)
-flow_sol = f_sol((t0, tfi), q0, p0i) 
+f_sol = fₘ * (t1i, fs) * (t2i, fₚ) * (t3i, fs);
+flow_sol = f_sol((t0, tfi), q0, p0i) ;
 
-plt = plot(solf, solution_label="(direct)")
+plt = plot(solution, solution_label="(direct)")
 plot(plt, flow_sol, solution_label="(indirect)")
