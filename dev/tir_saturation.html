@@ -1,45 +1,47 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bi-saturation (indirect) · spin</title><meta name="title" content="Bi-saturation (indirect) · spin"/><meta property="og:title" content="Bi-saturation (indirect) · spin"/><meta property="twitter:title" content="Bi-saturation (indirect) · spin"/><meta name="description" content="Documentation for spin."/><meta property="og:description" content="Documentation for spin."/><meta property="twitter:description" content="Documentation for spin."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">spin</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Introduction</a></li><li><a class="tocitem" href="bisaturation.html">Bi-saturation (direct)</a></li><li class="is-active"><a class="tocitem" href="tir_saturation.html">Bi-saturation (indirect)</a><ul class="internal"><li><a class="tocitem" href="#Direct-Method-:"><span>Direct Method :</span></a></li><li><a class="tocitem" href="#Indirect-Method-:"><span>Indirect Method :</span></a></li><li><a class="tocitem" href="#References"><span>References</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="tir_saturation.html">Bi-saturation (indirect)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="tir_saturation.html">Bi-saturation (indirect)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin/blob/main/docs/src/tir_saturation.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Saturation-of-pair-of-spins-:-direct-and-indirect-solutions"><a class="docs-heading-anchor" href="#Saturation-of-pair-of-spins-:-direct-and-indirect-solutions">Saturation of pair of spins : direct and indirect solutions</a><a id="Saturation-of-pair-of-spins-:-direct-and-indirect-solutions-1"></a><a class="docs-heading-anchor-permalink" href="#Saturation-of-pair-of-spins-:-direct-and-indirect-solutions" title="Permalink"></a></h1><p>Previously, we attempted to solve the bi-saturation problem as mentioned in <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup> using a direct method. We will now proceed to solve the same problem using an indirect method.</p><p>In this analysis, we will use the solution obtained from the direct method as an integral component of the shooting method. By leveraging the direct method&#39;s results, we aim to enhance the accuracy and efficiency of the shooting method&#39;s implementation.</p><h2 id="Direct-Method-:"><a class="docs-heading-anchor" href="#Direct-Method-:">Direct Method :</a><a id="Direct-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Direct-Method-:" title="Permalink"></a></h2><p>Let&#39;s first import the necessary packages, <em>OptimalControl</em>, <em>Plots</em> ... : </p><pre><code class="language-julia hljs">using OptimalControl
-using Plots
-using DifferentialEquations
-using LinearAlgebra
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bi-saturation · spin</title><meta name="title" content="Bi-saturation · spin"/><meta property="og:title" content="Bi-saturation · spin"/><meta property="twitter:title" content="Bi-saturation · spin"/><meta name="description" content="Documentation for spin."/><meta property="og:description" content="Documentation for spin."/><meta property="twitter:description" content="Documentation for spin."/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="index.html">spin</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="index.html">Introduction</a></li><li class="is-active"><a class="tocitem" href="tir_saturation.html">Bi-saturation</a><ul class="internal"><li><a class="tocitem" href="#Direct-Method-:"><span>Direct Method :</span></a></li><li><a class="tocitem" href="#Indirect-Method-:"><span>Indirect Method :</span></a></li><li><a class="tocitem" href="#References"><span>References</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href="tir_saturation.html">Bi-saturation</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="tir_saturation.html">Bi-saturation</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/control-toolbox/spin/blob/main/docs/src/tir_saturation.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Saturation-of-pair-of-spins-:-direct-and-indirect-solutions"><a class="docs-heading-anchor" href="#Saturation-of-pair-of-spins-:-direct-and-indirect-solutions">Saturation of pair of spins : direct and indirect solutions</a><a id="Saturation-of-pair-of-spins-:-direct-and-indirect-solutions-1"></a><a class="docs-heading-anchor-permalink" href="#Saturation-of-pair-of-spins-:-direct-and-indirect-solutions" title="Permalink"></a></h1><p>Previously, we attempted to solve the bi-saturation problem as mentioned in <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup> using a direct method. We will now proceed to solve the same problem using an indirect method.</p><p>In this analysis, we will use the solution obtained from the direct method as an integral component of the shooting method. By leveraging the direct method&#39;s results, we aim to enhance the accuracy and efficiency of the shooting method&#39;s implementation.</p><h2 id="Direct-Method-:"><a class="docs-heading-anchor" href="#Direct-Method-:">Direct Method :</a><a id="Direct-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Direct-Method-:" title="Permalink"></a></h2><p>Let&#39;s first import the necessary packages, <em>OptimalControl</em>, <em>Plots</em> ... : </p><pre><code class="language-julia hljs">using OrdinaryDiffEq
+using LinearAlgebra: norm
 using MINPACK
-using NLPModelsIpopt</code></pre><p>We will now define the parameters and the functions that we will use later on : </p><pre><code class="language-julia hljs"># Define the parameters of the problem
+using OptimalControl
+using Plots
+using NLPModelsIpopt</code></pre><p>We will now define the parameters and the functions that we will use later on : </p><pre><code class="language-julia hljs"># Define the parameters of the problem and the starting point
 Γ = 9.855e-2
 γ = 3.65e-3
 ϵ = 0.1
-function F0i(q)
-    y, z = q
-    res = [-Γ*y, γ*(1-z)]
-    return res
+q0 = [0, 1, 0, 1]
+
+@def ocp1 begin
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    x ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    x(0) == [0, 1, 0, 1]
+    x(tf) == [0, 0, 0, 0]
+
+    ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
+             (γ*(1-x₂(t)) +u(t)*x₁(t)),
+             (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
+             (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min
 end
 
-function F1i(q)
-    y, z = q
-    res = [-z, y]
-    return res
-end
+@def ocp2 begin
+    tf ∈ R, variable
+    t ∈ [0, tf], time
+    x ∈ R⁴, state
+    u ∈ R, control
+    tf ≥ 0
+    -1 ≤ u(t) ≤ 1
+    x(0) == [0.1, 0.9, 0.1, 0.9]
+    x(tf) == [0, 0, 0, 0]
 
-F0(q) = [ F0i(q[1:2]); F0i(q[3:4]) ]
-F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
-function ocp(q₁₀, q₂₀)
-    @def o begin
-        tf ∈ R, variable
-        t ∈ [0, tf], time
-        q = (y₁, z₁, y₂, z₂) ∈ R⁴, state
-        u ∈ R, control
-        tf ≥ 0
-        -1 ≤ u(t) ≤ 1
-        qᵢ₁ = [y₁, z₁]
-        qᵢ₂ = [y₂, z₂]
-        qᵢ₁(0) == q₁₀
-        qᵢ₂(0) == q₂₀
-        qᵢ₁(tf) == [0, 0]
-        qᵢ₂(tf) == [0, 0]
-        q̇(t) == F0(q(t)) + u(t) * F1(q(t))
-        tf → min
-    end
-    return o
+    ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)),
+             (γ*(1-x₂(t)) +u(t)*x₁(t)),
+             (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)),
+             (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    tf → min
 end
 # Function to plot the solution of the optimal control problem
 function plot_sol(sol)
@@ -54,10 +56,24 @@ function plot_sol(sol)
         plot(liste_y2, liste_z2, xlabel=&quot;y2&quot;, ylabel=&quot;z2&quot;),
         plot(sol.times, sol.control, xlabel=&quot;Time&quot;, ylabel=&quot;Control&quot;)
     )
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">plot_sol (generic function with 1 method)</code></pre><p>We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. </p><pre><code class="language-julia hljs">prob = ocp([0, 1], [0, 1])
-ocp_h = ocp([0.1, 0.9], [0.1, 0.9])
-initial_g = solve(ocp_h; grid_size=1000, linear_solver=&quot;mumps&quot;)
-direct_sol = solve(prob; grid_size=1000, init=initial_g, linear_solver=&quot;mumps&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We will now plot the solution : </p><pre><code class="language-julia hljs">plt = plot(direct_sol, solution_label=&quot;(direct)&quot;)</code></pre><img src="tir_saturation-a1ab6c63.svg" alt="Example block output"/><h2 id="Indirect-Method-:"><a class="docs-heading-anchor" href="#Indirect-Method-:">Indirect Method :</a><a id="Indirect-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Indirect-Method-:" title="Permalink"></a></h2><p>A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that <strong>we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular</strong> <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>.  First, let&#39;s define the Hamiltonian operator. Since : </p><p class="math-container">\[\dot q = F_0(q) + u * F_1(q)\]</p><p>then : </p><p class="math-container">\[H(q,p) = p&#39; * F_0(q) + u * p&#39; * F_1(q)\]</p><p>We&#39;ll note : <span>$H_0(q,p) = p&#39; * F_0(q) $ and $H_1(q,p) = p&#39; * F_1(q)$</span> Let <span>$u_{+} = 1$</span>, the positive bang control (resp. <span>$u_{-} = -1$</span> the negative bang control),  and </p><p class="math-container">\[u_s(q,p) = - \frac{H_{001}}{H_{101}} \]</p><p>the singular control, where : <span>$H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{101} ​= \{H_1​, \{H_0​, H_1\​}\}$</span> and for two Hamiltonien operators <span>$H_0​, H_1$</span> :  </p><p class="math-container">\[\{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)\]</p><p>First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.</p><pre><code class="language-julia hljs"># Lift the vector fields to their Hamiltonian counterparts
+end
+
+
+function F0i(q)
+    y, z = q
+    res = [-Γ*y, γ*(1-z)]
+    return res
+end
+
+function F1i(q)
+    y, z = q
+    res = [-z, y]
+    return res
+end
+
+F0(q) = [ F0i(q[1:2]); F0i(q[3:4]) ]
+F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">F1 (generic function with 1 method)</code></pre><p>We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. </p><pre><code class="language-julia hljs">initial_g = solve(ocp2; grid_size=1000, linear_solver=&quot;mumps&quot;)
+direct_sol = solve(ocp1; grid_size=1000, init=initial_g, linear_solver=&quot;mumps&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTBase.OptimalControlSolution</code></pre><p>We will now plot the solution : </p><pre><code class="language-julia hljs">plt = plot(direct_sol, solution_label=&quot;(direct)&quot;)</code></pre><img src="tir_saturation-6cfed764.svg" alt="Example block output"/><h2 id="Indirect-Method-:"><a class="docs-heading-anchor" href="#Indirect-Method-:">Indirect Method :</a><a id="Indirect-Method-:-1"></a><a class="docs-heading-anchor-permalink" href="#Indirect-Method-:" title="Permalink"></a></h2><p>A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that <strong>we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular</strong> <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>.  First, let&#39;s define the Hamiltonian operator. Since : </p><p class="math-container">\[\dot q = F_0(q) + u * F_1(q)\]</p><p>then : </p><p class="math-container">\[H(q,p) = p&#39; * F_0(q) + u * p&#39; * F_1(q)\]</p><p>We&#39;ll note : <span>$H_0(q,p) = p&#39; * F_0(q) $ and $H_1(q,p) = p&#39; * F_1(q)$</span> Let <span>$u_{+} = 1$</span>, the positive bang control (resp. <span>$u_{-} = -1$</span> the negative bang control),  and </p><p class="math-container">\[u_s(q,p) = - \frac{H_{001}}{H_{101}} \]</p><p>the singular control, where : <span>$H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{101} ​= \{H_1​, \{H_0​, H_1\​}\}$</span> and for two Hamiltonien operators <span>$H_0​, H_1$</span> :  </p><p class="math-container">\[\{H_0, H_1\} :=({\nabla}_p H_0  ∣ {\nabla}_x H_1 ) − ({\nabla}_x H_0 ∣ {\nabla}_p H_1)\]</p><p>First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.</p><pre><code class="language-julia hljs"># Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0)
 H1 = Lift(F1)
 
@@ -79,9 +95,9 @@ u = direct_sol.control
 p = direct_sol.costate
 
 # Define the flows for maximum, minimum, and singular controls
-fₚ = Flow(prob, (q, p, tf) -&gt; umax)
-fₘ = Flow(prob, (q, p, tf) -&gt; -umax)
-fs = Flow(prob, (q, p, tf) -&gt; us(q, p))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTFlows.OptimalControlFlow(CTFlowsODE.var&quot;#f#19&quot;{CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}}(CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}(Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}(), nothing, 1.0e-10, 1.0e-10, Any[]), Core.Box(CTFlowsODE.var&quot;#f#18#21&quot;(Core.Box(CTFlowsODE.var&quot;#f#19&quot;{CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}}(#= circular reference @-4 =#))))), CTFlowsODE.var&quot;#rhs!#22&quot;{CTBase.Hamiltonian{CTBase.NonAutonomous, CTBase.NonFixed}}(CTBase.Hamiltonian{CTBase.NonAutonomous, CTBase.NonFixed}(CTFlows.var&quot;#39#40&quot;{CTBase.Dynamics{CTBase.Autonomous, CTBase.NonFixed}, CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}}(CTBase.Dynamics{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;##346#5&quot;()), CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;#21#22&quot;())))), Real[], Tuple{Real, Union{Real, AbstractVector{&lt;:Real}}}[], CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;#21#22&quot;()), CTBase.OptimalControlModel{CTBase.Autonomous, CTBase.NonFixed}
+fₚ = Flow(ocp1, (q, p, tf) -&gt; umax)
+fₘ = Flow(ocp1, (q, p, tf) -&gt; -umax)
+fs = Flow(ocp1, (q, p, tf) -&gt; us(q, p))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">CTFlows.OptimalControlFlow(CTFlowsODE.var&quot;#f#19&quot;{CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}}(CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}(Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}(), nothing, 1.0e-10, 1.0e-10, Any[]), Core.Box(CTFlowsODE.var&quot;#f#18#21&quot;(Core.Box(CTFlowsODE.var&quot;#f#19&quot;{CTFlowsODE.var&quot;#f#17#20&quot;{Base.Pairs{Symbol, Union{}, Tuple{}, @NamedTuple{}}, Nothing, Float64, Float64, Vector{Any}}}(#= circular reference @-4 =#))))), CTFlowsODE.var&quot;#rhs!#22&quot;{CTBase.Hamiltonian{CTBase.NonAutonomous, CTBase.NonFixed}}(CTBase.Hamiltonian{CTBase.NonAutonomous, CTBase.NonFixed}(CTFlows.var&quot;#39#40&quot;{CTBase.Dynamics{CTBase.Autonomous, CTBase.NonFixed}, CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}}(CTBase.Dynamics{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;##241#1&quot;()), CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;#19#20&quot;())))), Real[], Tuple{Real, Union{Real, AbstractVector{&lt;:Real}}}[], CTBase.ControlLaw{CTBase.Autonomous, CTBase.NonFixed}(Main.var&quot;#19#20&quot;()), CTBase.OptimalControlModel{CTBase.Autonomous, CTBase.NonFixed}
   model_expression: Expr
   initial_time: Int64 0
   initial_time_name: String &quot;0&quot;
@@ -93,7 +109,7 @@ fs = Flow(prob, (q, p, tf) -&gt; us(q, p))</code></pre><pre class="documenter-ex
   control_name: String &quot;u&quot;
   state_dimension: Int64 4
   state_components_names: Array{String}((4,))
-  state_name: String &quot;q&quot;
+  state_name: String &quot;x&quot;
   variable_dimension: Int64 1
   variable_components_names: Array{String}((1,))
   variable_name: String &quot;tf&quot;
@@ -133,7 +149,7 @@ z_2(t_f, t_3, z_3, u_s) \\
 (p_{z_1}(t_f, t_3, z_3, u_s) + p_{z_2}(t_f, t_3, z_3, u_s)) \gamma + p_0 \\
 z(t_1, 0, z_0, u \pm) - z_1 \\
 z(t_2, t_1, z_1, u_s) - z_2 \\
-z(t_3, t_2, z_2, u \pm) - z
+z(t_3, t_2, z_2, u \pm) - z_3
 \end{bmatrix}\]</p><pre><code class="language-julia hljs"># Function to compute the shooting function for the indirect method
 function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
     qi1, pi1 = fₘ(0, q0, p0, t1)
@@ -183,7 +199,7 @@ t3 = min(t3f...)
 
 # Extract initial and intermediate costates and states and final time
 p0 = p(t0)
-q0 = [0, 1, 0, 1]
+
 tf = direct_sol.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
@@ -207,39 +223,39 @@ println(&quot;p2 = &quot;, p2)
 println(&quot;p3 = &quot;, p3)
 println(&quot;q1 = &quot;, q1)
 println(&quot;q2 = &quot;, q2)
-println(&quot;q3 = &quot;, q3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">p0 = [-1.0, -2.708879270644842, -1.0, -7.1610250181319]
+println(&quot;q3 = &quot;, q3)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">p0 = [-1.0, -2.7088792706337594, -1.0, -7.161025018151916]
 t1 = 1.8355505720649208
 t2 = 9.580678595655927
 t3 = 13.117471161341992
 tf = 44.76952614792489
-p1 = [-3.2218343311008915, 0.06921606515357917, -7.978635723021344, 0.1680727865624547]
-p2 = [-7.009088822959361, -1.2229293654698654, -16.984887155507888, 2.430565502716156]
-p3 = [7.575108239294266, 4.157062857684455, 20.362702530914923, -3.0729745200803165]
-q1 = [0.8951441025099521, -0.019230769230769232, 0.912909849976097, -0.019230769230769232]
-q2 = [0.412399148637373, -0.13205104396218456, 0.42660613534261055, 0.032522960820251696]
-q3 = [-0.36163875910093074, -0.00970029689409695, -0.3630413030108652, -0.02344127034729294]</code></pre><p>Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution&#39;s accuracy. </p><pre><code class="language-julia hljs"># Initialize the shooting function residuals
+p1 = [-3.2218343310490964, 0.06921606515247805, -7.978635723023974, 0.16807278656249774]
+p2 = [-7.0090888227494785, -1.2229293655898477, -16.984887155673235, 2.4305655014149496]
+p3 = [7.5751082392626525, 4.157062857288453, 20.36270253095551, -3.0729745196420524]
+q1 = [0.8951441025098018, -0.019230769230769232, 0.912909849976164, -0.019230769230769232]
+q2 = [0.41239914864135185, -0.13205104394999997, 0.42660613534173064, 0.032522960831609014]
+q3 = [-0.3616387591009432, -0.009700296894007988, -0.3630413030108675, -0.02344127034721573]</code></pre><p>Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution&#39;s accuracy. </p><pre><code class="language-julia hljs"># Initialize the shooting function residuals
 s = similar(p0, 32)
 
 # Compute the initial residuals for the shooting function
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println(&quot;Norm of the shooting function: ‖s‖ = &quot;, norm(s), &quot;\n&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">┌ Warning: Using arrays or dicts to store parameters of different types can hurt performance.
 │ Consider using tuples instead.
-└ @ SciMLBase ~/.julia/packages/SciMLBase/jh7eV/src/performance_warnings.jl:33
-Norm of the shooting function: ‖s‖ = 4.752588987331594</code></pre><p>The direct solution is not very accurate, as shown by the shooting function&#39;s value of about <span>$1.11$</span> using the parameters from the direct method.</p><p>We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.</p><pre><code class="language-julia hljs"># Define a nonlinear equation solver for the shooting method
+└ @ SciMLBase ~/.julia/packages/SciMLBase/2N9y0/src/performance_warnings.jl:33
+Norm of the shooting function: ‖s‖ = 4.752588987166829</code></pre><p>The direct solution is not very accurate, as shown by the shooting function&#39;s value of about <span>$1.11$</span> using the parameters from the direct method.</p><p>We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.</p><pre><code class="language-julia hljs"># Define a nonlinear equation solver for the shooting method
 nle = (s, ξ) -&gt; shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]
 # Solve the shooting equations to find the optimal times and costate
 
-indirect_sol = fsolve(nle, ξ; show_trace=true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Results of Nonlinear Solver Algorithm
+indirect_sol = fsolve(nle, ξ; tol=5e-3, show_trace=true)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Results of Nonlinear Solver Algorithm
  * Algorithm: Modified Powell
- * Starting Point: [-1.0, -2.708879270644842, -1.0, -7.1610250181319, 1.8355505720649208, 9.580678595655927, 13.117471161341992, 44.76952614792489, 0.8951441025099521, -0.019230769230769232, 0.912909849976097, -0.019230769230769232, -3.2218343311008915, 0.06921606515357917, -7.978635723021344, 0.1680727865624547, 0.412399148637373, -0.13205104396218456, 0.42660613534261055, 0.032522960820251696, -7.009088822959361, -1.2229293654698654, -16.984887155507888, 2.430565502716156, -0.36163875910093074, -0.00970029689409695, -0.3630413030108652, -0.02344127034729294, 7.575108239294266, 4.157062857684455, 20.362702530914923, -3.0729745200803165]
- * Zero: [1.9971623765999449, -2.66060097926912, -1.1079581963159304, -7.188789937714131, 1.7720540178027837, 9.603050124408712, 13.089120969125126, 44.76589299744697, 0.900503814653987, -0.13459664443340263, 0.9184051114736804, 0.03240952892023857, -3.1893425511298337, -1.4334049319589293, -7.91675637584791, 1.8016025646786877, 0.41131725822796966, -0.13214505694912868, 0.42556726264485, 0.03243112124512384, -6.99833351439065, -1.2157884328980755, -16.995374198404868, 2.4250215610805177, -0.36252855218625507, -0.00948189492928248, -0.3639479818295994, -0.023253522268119897, 7.529542645543143, 4.14279822427816, 20.274828208040475, -3.071785919522845]
- * Inf-norm of residuals: 0.000000
- * Convergence: false
- * Message: iteration is not making good progress
- * Total time: 161.759214 seconds
- * Function Calls: 150
- * Jacobian Calls (df/dx): 16</code></pre><p>We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of <em>s</em> in this case is <span>$10^6$</span> smaller than the previously computed one using the direct method.</p><pre><code class="language-julia hljs"># Extract the refined initial costate and switching times from the solution
+ * Starting Point: [-1.0, -2.7088792706337594, -1.0, -7.161025018151916, 1.8355505720649208, 9.580678595655927, 13.117471161341992, 44.76952614792489, 0.8951441025098018, -0.019230769230769232, 0.912909849976164, -0.019230769230769232, -3.2218343310490964, 0.06921606515247805, -7.978635723023974, 0.16807278656249774, 0.41239914864135185, -0.13205104394999997, 0.42660613534173064, 0.032522960831609014, -7.0090888227494785, -1.2229293655898477, -16.984887155673235, 2.4305655014149496, -0.3616387591009432, -0.009700296894007988, -0.3630413030108675, -0.02344127034721573, 7.5751082392626525, 4.157062857288453, 20.36270253095551, -3.0729745196420524]
+ * Zero: [2.0429075606688425, -3.2604735729889436, -1.158785224168659, -6.598856507299758, 1.7604306190965195, 9.467356939714668, 12.930737036917519, 45.15551935100293, 0.903051620256367, -0.12418794648561907, 0.919069115630536, 0.041940184232503466, -3.821480795761973, -1.366119344270337, -7.2819398196943546, 1.7325994340379418, 0.41810753839088616, -0.12198278905466027, 0.43137720446437744, 0.04185045534622702, -8.25623059958217, -1.1061054446339609, -15.440627632488308, 2.2884052220313302, -0.3661052654830728, -0.011322488510318968, -0.37024626168099456, -0.023613967346476906, 9.093605398581238, 4.319731630749566, 18.315314682585676, -3.2697458529117913]
+ * Inf-norm of residuals: 0.002236
+ * Convergence: true
+ * Message: algorithm estimates that the relative error between x and the solution is at most tol
+ * Total time: 23.902579 seconds
+ * Function Calls: 17
+ * Jacobian Calls (df/dx): 3</code></pre><p>We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of <em>s</em> in this case is <span>$10^6$</span> smaller than the previously computed one using the direct method.</p><pre><code class="language-julia hljs"># Extract the refined initial costate and switching times from the solution
 p0 = indirect_sol.x[1:4]
 t1 = indirect_sol.x[5]
 t2 = indirect_sol.x[6]
@@ -252,8 +268,8 @@ s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println(&quot;Norm of the shooting function: ‖s‖ = &quot;, norm(s), &quot;\n&quot;)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">┌ Warning: Using arrays or dicts to store parameters of different types can hurt performance.
 │ Consider using tuples instead.
-└ @ SciMLBase ~/.julia/packages/SciMLBase/jh7eV/src/performance_warnings.jl:33
-Norm of the shooting function: ‖s‖ = 2.0032658917625174e-8</code></pre><p>Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.</p><pre><code class="language-julia hljs"># Define the composed flow solution using the switching times and controls
+└ @ SciMLBase ~/.julia/packages/SciMLBase/2N9y0/src/performance_warnings.jl:33
+Norm of the shooting function: ‖s‖ = 0.003283249562728128</code></pre><p>Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.</p><pre><code class="language-julia hljs"># Define the composed flow solution using the switching times and controls
 f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
 
 # Compute the flow solution over the time interval
@@ -261,4 +277,4 @@ flow_sol = f_sol((t0, tf), q0, p0)
 
 # Plot the direct and indirect solutions for comparison
 
-plot(plt, flow_sol, solution_label=&quot;(indirect)&quot;)</code></pre><img src="tir_saturation-20b3ad0f.svg" alt="Example block output"/><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="bisaturation.html">« Bi-saturation (direct)</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Wednesday 24 July 2024 09:31">Wednesday 24 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot(plt, flow_sol, solution_label=&quot;(indirect)&quot;)</code></pre><img src="tir_saturation-7fd3204b.svg" alt="Example block output"/><h2 id="References"><a class="docs-heading-anchor" href="#References">References</a><a id="References-1"></a><a class="docs-heading-anchor-permalink" href="#References" title="Permalink"></a></h2><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Introduction</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.5.0 on <span class="colophon-date" title="Friday 26 July 2024 14:30">Friday 26 July 2024</span>. Using Julia version 1.10.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
