@@ -6,6 +6,7 @@ In this analysis, we will use the solution obtained from the direct method as an
 
 ## Direct Method : 
 Let's first import the necessary packages, *OptimalControl*, *Plots* ... : 
+
 ```@example main
 using OrdinaryDiffEq
 using LinearAlgebra: norm
@@ -14,7 +15,9 @@ using OptimalControl
 using Plots
 using NLPModelsIpopt
 ```
+
 We will now define the parameters and the functions that we will use later on : 
+
 ```@example main 
 # Define the parameters of the problem and the starting point
 Γ = 9.855e-2  
@@ -32,10 +35,10 @@ q0 = [0, 1, 0, 1]
     x(0) == [0, 1, 0, 1]
     x(tf) == [0, 0, 0, 0] 
     
-    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
-                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)), 
+             (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+             (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+             (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
     tf → min 
 end
 
@@ -49,10 +52,10 @@ end
     x(0) == [0.1, 0.9, 0.1, 0.9]
     x(tf) == [0, 0, 0, 0] 
     
-    ẋ(t) == [ (-Γ*x₁(t) -u(t)*x₂(t)), 
-                (γ*(1-x₂(t)) +u(t)*x₁(t)), 
-                (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
-                (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
+    ẋ(t) == [(-Γ*x₁(t) -u(t)*x₂(t)), 
+             (γ*(1-x₂(t)) +u(t)*x₁(t)), 
+             (-Γ*x₃(t) -(1-ϵ)* u(t)*x₄(t)), 
+             (γ*(1-x₄(t)) +(1-ϵ)*u(t)*x₃(t))]
     tf → min 
 end
 # Function to plot the solution of the optimal control problem
@@ -88,16 +91,18 @@ F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
 ```
 
 We will use the same technique used before to solve the problem which involves using the solution of the same problem but with a slight change in the initial conditions, as an initial guess. 
+
 ```@example main 
 initial_g = solve(ocp2; grid_size=1000, linear_solver="mumps")
 direct_sol = solve(ocp1; grid_size=1000, init=initial_g, linear_solver="mumps")
-
 ```
 
 We will now plot the solution : 
+
 ```@example main 
 plt = plot(direct_sol, solution_label="(direct)")
 ```
+
 ## Indirect Method : 
 A quick look on the plot of the control u, reveals that the optimal solution consists of a bang arc with minimal control(-1), followed by a singular arc, then another bang arc with maximal control (+1), and the final arc is a singular arc, which means that **we have a solution with a structure of the form BSBS, i.e. Bang-Singular-Bang-Singular** [^1]. 
 First, let's define the Hamiltonian operator.
@@ -122,7 +127,6 @@ the singular control, where : $H_{001} ​= \{H_0 ​, \{H_0​, H_1\​}\}, H_{
 First, we refine the solution with a higher grid size for better accuracy. We also lift the vector fields to their Hamiltonian counterparts and compute the Lie brackets of these Hamiltonian vector fields. Additionally, we define the singular control function and extract the solution components.
 
 ```@example main 
-
 # Lift the vector fields to their Hamiltonian counterparts
 H0 = Lift(F0) 
 H1 = Lift(F1)
@@ -145,10 +149,11 @@ u = direct_sol.control
 p = direct_sol.costate
 
 # Define the flows for maximum, minimum, and singular controls
-fₚ = Flow(prob, (q, p, tf) -> umax)
-fₘ = Flow(prob, (q, p, tf) -> -umax)
-fs = Flow(prob, (q, p, tf) -> us(q, p))
+fₚ = Flow(ocp1, (q, p, tf) -> umax)
+fₘ = Flow(ocp1, (q, p, tf) -> -umax)
+fs = Flow(ocp1, (q, p, tf) -> us(q, p))
 ```
+
 Next, we define a function to compute the shooting function for the indirect method. This function calculates the state and costate at the switching times and populates the shooting function residuals based on its expression :
 ```math
 S : \mathbb{R}^{32} \rightarrow \mathbb{R}^{32}
@@ -177,9 +182,10 @@ z_2(t_f, t_3, z_3, u_s) \\
 (p_{z_1}(t_f, t_3, z_3, u_s) + p_{z_2}(t_f, t_3, z_3, u_s)) \gamma + p_0 \\
 z(t_1, 0, z_0, u \pm) - z_1 \\
 z(t_2, t_1, z_1, u_s) - z_2 \\
-z(t_3, t_2, z_2, u \pm) - z
+z(t_3, t_2, z_2, u \pm) - z_3
 \end{bmatrix}
 ```
+
 ```@example main 
 # Function to compute the shooting function for the indirect method
 function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
@@ -203,6 +209,7 @@ function shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
     s[29:32] = pi3 - p3
 end
 ```
+
 We then initialize parameters to find the switching times. We identify the intervals where the control is near zero, indicating singular control, and determine the switching times.
 
 ```@example main
@@ -260,9 +267,10 @@ println("p3 = ", p3)
 println("q1 = ", q1)
 println("q2 = ", q2)
 println("q3 = ", q3)
-
 ```
+
 Next, we initialize the shooting function residuals and compute the initial residuals for the shooting function to verify the solution's accuracy. 
+
 ```@example main
 # Initialize the shooting function residuals
 s = similar(p0, 32)
@@ -270,21 +278,23 @@ s = similar(p0, 32)
 # Compute the initial residuals for the shooting function
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
-
 ```
+
 The direct solution is not very accurate, as shown by the shooting function's value of about $1.11$ using the parameters from the direct method.
 
 We now define a nonlinear equation solver for the shooting method. This solver refines the initial costate, switching times and the intermediate states and costates to find the optimal solution using the shooting function.
+
 ```@example main
 # Define a nonlinear equation solver for the shooting method
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])   
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]
 # Solve the shooting equations to find the optimal times and costate
 
-indirect_sol = fsolve(nle, ξ; show_trace=true)
-
+indirect_sol = fsolve(nle, ξ; tol=5e-3, show_trace=true)
 ```
+
 We extract the initial costate, switching times and the intermediate states and costates. We then recompute the residuals for the shooting function to ensure the accuracy of the refined solution. Therefore, we conclude that this solution is more accurate, as the norm of *s* in this case is $10^6$ smaller than the previously computed one using the direct method.
+
 ```@example main
 # Extract the refined initial costate and switching times from the solution
 p0 = indirect_sol.x[1:4]
@@ -298,9 +308,10 @@ q1, p1, q2, p2, q3, p3 = indirect_sol.x[9:12], indirect_sol.x[13:16], indirect_s
 s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
-
 ```
+
 Finally, we define the composed flow solution using the switching times and controls. We compute the flow solution over the time interval and plot both the direct and indirect solutions for comparison.
+
 ```@example main
 # Define the composed flow solution using the switching times and controls
 f_sol = fₘ * (t1, fs) * (t2, fₚ) * (t3, fs)
@@ -311,9 +322,7 @@ flow_sol = f_sol((t0, tf), q0, p0)
 # Plot the direct and indirect solutions for comparison
 
 plot(plt, flow_sol, solution_label="(indirect)")
-
 ```
-
 
 ## References
 [^1]: Bernard Bonnard, Olivier Cots, Jérémy Rouot, Thibaut Verron. Time minimal saturation of a pair of spins and application in magnetic resonance imaging. Mathematical Control and Related Fields, 2020, 10 (1), pp.47-88.

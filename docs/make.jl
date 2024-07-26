@@ -6,8 +6,7 @@ makedocs(;
     format = Documenter.HTML(prettyurls = false),
     pages = [
         "Introduction" => "index.md",
-        "Bi-saturation (direct)" => "bisaturation.md",
-        "Bi-saturation (indirect)" => "tir_saturation.md",
+        "Bi-saturation" => "tir_saturation.md",
     ],
     checkdocs=:none,
 )
