@@ -110,13 +110,13 @@ Then we perform homotopy on the initial condition with a step of 0.1,
 ```@example main
 q₀₁ = [1, 0]
 ocp_x = ocp2(q₀₁, q₀₁, ϵ)
-sol_x = solve(ocp_x, grid_size=100)
+sol_x = solve(ocp_x; grid_size=100, linear_solver="mumps")
 sol_x.variable
 L_x = [sol_x]
 for i in 1:10
     x₀ = i / 10 * [0, 1, 0, 1] + (1 - i / 10) * [1, 0, 1, 0]
     ocpi_x = ocp2(x₀[1:2], x₀[3:4], ϵ)
-    sol_i_x = solve(ocpi_x, grid_size=100, display=false, init=L_x[end]) 
+    sol_i_x = solve(ocpi_x; grid_size=100, display=false, init=L_x[end], linear_solver="mumps") 
     push!(L_x, sol_i_x)
 end
 nothing # hide
@@ -141,7 +141,7 @@ Let us now solve this problem differently. One potential initial guess could be 
 q₀ = [0, 1]
 ocp = ocp1(q₀)
 N = 100
-sol = solve(ocp, grid_size=N) 
+sol = solve(ocp; grid_size=N, linear_solver="mumps") 
 ```
 
 Now we extract the control, final time and then duplicate the state to be able to have an initial guess for the two spins.
@@ -157,7 +157,7 @@ tf_init = sol.variable
 ```@example main
 ocp_0 = ocp2(q₀, q₀, 0)
 init = (state=q_init, control=u_init, variable=tf_init)
-sol2 = solve(ocp_0 ; grid_size=N, init=init)
+sol2 = solve(ocp_0 ; grid_size=N, init=init, linear_solver="mumps")
 ```
 
 We define the function below that computes the problem depending on $\varepsilon$: 
@@ -170,7 +170,7 @@ L = [sol2]
 for i in 1:10
     global ϵ₁ = ϵ₁ + 0.01
     ocpi = ocp2(q₀, q₀, ϵ₁)
-    sol_i = solve(ocpi, grid_size=100, display=false, init=initial_guess)
+    sol_i = solve(ocpi; grid_size=100, display=false, init=initial_guess, linear_solver="mumps")
     global L
     push!(L, sol_i)
     global initial_guess = sol_i
@@ -186,18 +186,13 @@ Another approach involves defining a bi-saturation problem with a slightly adjus
 
 ##  Bi-Saturation Problem: initial Guess from a Slightly Different Problem
 ```@example main
-ϵ = 0.1
 q₁₉ = [0.1, 0.9]
-ocpu = ocp2(q₁₉, q₁₉, ϵ)
-initial_g = solve(ocpu, grid_size=100)
-ocpf = prob
-for i in 1:10
-    global initial_g
-    solf = solve(ocpf, grid_size=i*100, init=initial_g)
-    initial_g = solf
-end
+ocp_h = ocp2(q₁₉, q₁₉, ϵ)
+initial_g = solve(ocp_h; grid_size=1000, linear_solver="mumps")
+direct_sol = solve(prob; grid_size=1000, init=initial_g, linear_solver="mumps")
+
 # Plot the figures
-plot_sol(initial_g)
+plot_sol(direct_sol)
 ```
 
 Conclusion: This solution is better that the two previous, which proves that these were strict local minimisers.

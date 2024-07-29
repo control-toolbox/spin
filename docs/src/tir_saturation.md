@@ -145,9 +145,9 @@ u = direct_sol.control
 p = direct_sol.costate
 
 # Define the flows for maximum, minimum, and singular controls
-fₚ = Flow(prob, (q, p, tf) -> umax)
-fₘ = Flow(prob, (q, p, tf) -> -umax)
-fs = Flow(prob, (q, p, tf) -> us(q, p))
+fₚ = Flow(ocp1, (q, p, tf) -> umax)
+fₘ = Flow(ocp1, (q, p, tf) -> -umax)
+fs = Flow(ocp1, (q, p, tf) -> us(q, p))
 ```
 Next, we define a function to compute the shooting function for the indirect method. This function calculates the state and costate at the switching times and populates the shooting function residuals based on its expression :
 ```math
