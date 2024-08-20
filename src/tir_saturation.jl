@@ -91,6 +91,7 @@ q = solution.state
 u = solution.control
 p = solution.costate
 #φ(t) = H1(q(t), p(t))
+wh =p(0)
 umax = 1
 u0 = 0
 #tolerances = (abstol=1e-14, reltol=1e-10)
