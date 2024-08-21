@@ -58,11 +58,12 @@ def solve_newton(time, xp, z, zmid, ocp, Inn, rowis, colis, shape_jac, res_odeis
             xp_old, z_old, zmid_old, alpha_old = xp, z, zmid, alpha
             xp, z, zmid, cost, alpha, rhsmid, res, armflag = armijo(time, xp, z, zmid, ocp, direction, res, rhsmid,
                                                                     coeff_damping, max_probes)
-            max_res = np.max(np.abs(res))
+            abs_res = np.abs(res)                                                    
+            max_res = np.max(abs_res)
             tol = (tol_odes * (1. + np.abs(rhsmid))).ravel(order="F")
-            if (np.all(np.abs(res[res_odeis]) <= tol)
-                    and np.all(np.abs(res[res_algis]) <= atol)
-                    and np.all(np.abs(res[:xp.shape[0]]) <= atol)):
+            if (np.all(abs_res[res_odeis] <= tol)
+                    and np.all(abs_res[res_algis] <= atol)
+                    and np.all(abs_res[:xp.shape[0]] <= atol)):
                 success = True
                 if display == 2:
                     print('           Success damped Newton step = ' + str(max_res) + ' alpha = ' + str(
@@ -81,9 +82,10 @@ def solve_newton(time, xp, z, zmid, ocp, Inn, rowis, colis, shape_jac, res_odeis
                     and np.linalg.norm(zmid - zmid_old) == 0. and alpha == alpha_old):
                 break
             iter += 1
-        ode_res = res[res_odeis].reshape((xp.shape[0], len(time) - 1), order="F")
-        bc_res = res[:xp.shape[0]]
-        nlse_infos = NLSEInfos(success, iter, ode_res, tol, res_algis, atol, bc_res, atol)
+        ode_res = np.max(abs_res[res_odeis])
+        ae_res = np.max(abs_res[res_algis])
+        bc_res = np.max(abs_res[:xp.shape[0]])
+        nlse_infos = NLSEInfos(success, iter, ode_res, max(tol_odes), ae_res, atol, bc_res, atol)
         return xp, z, zmid, rhsmid, nlse_infos
 
 
