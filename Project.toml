@@ -4,6 +4,8 @@ authors = ["Ibtissam Mimoun<ibtissam.mimoun@enseeiht.fr>", "Jean-Baptiste Cailla
 version = "0.1.0"
 
 [deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 HSL = "34c5aeac-e683-54a6-a0e9-6e0fdc586c50"
 HSL_jll = "017b0a0e-03f4-516a-9b91-836bbd1904dd"
 MINPACK = "4854310b-de5a-5eb6-a2a5-c1dee2bd17f9"

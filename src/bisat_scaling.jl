@@ -81,3 +81,49 @@ function plot_sol(sol)
 end
 
 plot_sol(solution)
+
+t = solution.times
+q = solution.state
+u = solution.control
+p = solution.costate
+
+function n_points(n, sol)
+    t = sol.times
+    q = sol.state
+    u = sol.control
+    p = sol.costate
+    n_points_p = []
+    n_points_q = []
+    n_points_u = []
+    for i in eachindex(t)
+        if (i-1) % n == 0
+            push!(n_points_p, p(t[i]))
+            push!(n_points_q, q(t[i]))
+            push!(n_points_u, u(t[i]))
+        end
+    end
+    return n_points_p, n_points_q, n_points_u
+end
+
+n_points_p, n_points_q, n_points_u = n_points(2, solution)
+
+# Separate the states and costates
+p1 = [elt[1] for elt in n_points_p]
+p2 = [elt[2] for elt in n_points_p]
+p3 = [elt[3] for elt in n_points_p]
+p4 = [elt[4] for elt in n_points_p]
+p5 = [elt[5] for elt in n_points_p]
+q1 = [elt[1] for elt in n_points_q]
+q2 = [elt[2] for elt in n_points_q]
+q3 = [elt[3] for elt in n_points_q]
+q4 = [elt[4] for elt in n_points_q]
+
+
+#exporting the data
+
+using CSV
+using DataFrames
+
+df = DataFrame(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, q1 = q1, q2 = q2, q3 = q3, q4 = q4, u = n_points_u)
+
+CSV.write("donnees_init.csv", df)

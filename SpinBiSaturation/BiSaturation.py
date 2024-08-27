@@ -1,5 +1,8 @@
 from utils_functions import FB
 import numpy as np
+import pandas as pd
+
+df = pd.read_csv('donnees_init.csv')
 
 
 class BiSaturation:
@@ -13,7 +16,16 @@ class BiSaturation:
 
         self.x0 = np.array([0., 1., 0., 1.])
         self.xfinal = np.zeros((4,))
-  
+        self.p1 = df['p1'].values
+        self.p2 = df['p2'].values
+        self.p3 = df['p3'].values
+        self.p4 = df['p4'].values
+        self.p5 = df['p5'].values
+        self.q1 = df['q1'].values
+        self.q2 = df['q2'].values
+        self.q3 = df['q3'].values
+        self.q4 = df['q4'].values
+        self.u = df['u'].values
     def set_eps(self, eps):
         self.eps = eps
 
@@ -21,15 +33,18 @@ class BiSaturation:
         n = 501
         time = np.linspace(0., 1., n)
         xp = np.zeros((10, len(time)))
-        xp[1] = np.linspace(self.x0[1], self.xfinal[1], n)
-        xp[3] = np.linspace(self.x0[3], self.xfinal[3], n)
-        xp[4] = np.full_like(time, 44.76952614788222)
-        xp[5] = np.linspace(0, -1, n)
-        xp[6] = np.linspace(0, -1, n)
-        xp[7] = np.linspace(0, -1, n)
-        xp[8] = np.linspace(0, -1, n)
+        xp[0] = self.q1
+        xp[1] = self.q2
+        xp[2] = self.q3
+        xp[3] = self.q4
+        xp[4] = np.full_like(time, 44.7695)
+        xp[5] = self.p1
+        xp[6] = self.p2
+        xp[7] = self.p3
+        xp[8] = self.p4
+        xp[9] = self.p5
         z = np.zeros((3, len(time)))
-        z[0] = -1
+        z[0] =self.u
         return time, xp, z
 
     def ode(self, time, xp, z):
@@ -38,9 +53,9 @@ class BiSaturation:
         u, _, _ = z
         dxdpdt = np.zeros_like(xp)
         dxdpdt[0] = (- self.gamma1 * x[0] - x[1] * u) * x[4]
-        dxdpdt[1] = (self.gamma2 * (1. - x[1]) + x[0] * u) * x[4] # correction equation
+        dxdpdt[1] = (self.gamma2 * (1. - x[1]) + x[0] * u) * x[4]
         dxdpdt[2] = (- self.gamma1 * x[2] - (1. - self.eps_par) * x[3] * u) * x[4]
-        dxdpdt[3] = (self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u) * x[4] # correction equation
+        dxdpdt[3] = (self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u) * x[4]
         dxdpdt[4] = 0.
         dxdpdt[5] = (self.gamma1 * p[0] - p[1] * u) * x[4]
         dxdpdt[6] = (u * p[0] + self.gamma2 * p[1]) * x[4]
@@ -51,7 +66,7 @@ class BiSaturation:
                 + p[1] * (self.gamma2 * (1. - x[1]) + x[0] * u)
                 + p[2] * (- self.gamma1 * x[2] - (1. - self.eps_par) * x[3] * u)
                 + p[3] * (self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u)
-        ) # correction signe gamma2 et signe - total
+        ) 
         return dxdpdt
     
     def odejac(self, time, xp, z):
@@ -66,47 +81,36 @@ class BiSaturation:
         fxp[0, 1] = - u * x[4]
         fxp[0, 4] = - self.gamma1 * x[0] - x[1] * u
 
-        # Line 1 : (self.gamma2 * (1. - x[1]) + x[0] * u) * x[4]
         fxp[1, 0] = u * x[4]
         fxp[1, 1] = - self.gamma2 * x[4]
         fxp[1, 4] = self.gamma2 * (1. - x[1]) + x[0] * u
 
-        # Line 2 : (- self.gamma1 * x[2] - (1. - self.eps_par) * x[3] * u) * x[4]
         fxp[2, 2] = - self.gamma1 * x[4]
         fxp[2, 3] = - (1. - self.eps_par) * u * x[4]
         fxp[2, 4] = - self.gamma1 * x[2] - (1. - self.eps_par) * x[3] * u
 
-        # Line 3 : (self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u) * x[4]
         fxp[3, 2] = (1 - self.eps_par) * u * x[4]
         fxp[3, 3] = - self.gamma2 * x[4]
         fxp[3, 4] = self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u
 
-        # Line 5 : (self.gamma1 * p[0] - p[1] * u) * x[4]
         fxp[5, 4] = self.gamma1 * p[0] - p[1] * u
         fxp[5, 5] = self.gamma1 * x[4]
         fxp[5, 6] = - u * x[4]
 
-        # Line 6 : (u * p[0] + self.gamma2 * p[1]) * x[4]
         fxp[6, 4] = u * p[0] + self.gamma2 * p[1]
         fxp[6, 5] = u * x[4]
         fxp[6, 6] = self.gamma2 * x[4]
 
-        # Line 7 : (self.gamma1 * p[2] - (1. - self.eps_par) * p[3] * u) * x[4]
+
         fxp[7, 4] = self.gamma1 * p[2] - (1. - self.eps_par) * p[3] * u
         fxp[7, 7] = self.gamma1 * x[4]
         fxp[7, 8] = - (1 - self.eps_par) * u * x[4]
 
-        # Line 8 : ((1. - self.eps_par) * u * p[2] + self.gamma2 * p[3]) * x[4]
+        
         fxp[8, 4] = (1. - self.eps_par) * u * p[2] + self.gamma2 * p[3]
         fxp[8, 7] = (1 - self.eps_par) * u * x[4]
         fxp[8, 8] = self.gamma2 * x[4]
 
-        # Line 9 : - (
-        #                 p[0] * (- self.gamma1 * x[0] - x[1] * u)
-        #                 + p[1] * (self.gamma2 * (1. - x[1]) + x[0] * u)
-        #                 + p[2] * (- self.gamma1 * x[2] - (1. - self.eps_par) * x[3] * u)
-        #                 + p[3] * (self.gamma2 * (1. - x[3]) + (1. - self.eps_par) * x[2] * u)
-        #         )
         fxp[9, 0] = -(- self.gamma1 * p[0] + p[1] * u)
         fxp[9, 1] = -(- p[0] * u - p[1] * self.gamma2)
         fxp[9, 2] = -(- p[2] * self.gamma1 + p[3] * (1. - self.eps_par) * u)
