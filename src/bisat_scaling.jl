@@ -9,9 +9,9 @@ using NLPModelsIpopt
 Γ = 9.855e-2  
 γ = 3.65e-3  
 ϵ = 0.1
-q0 = [0, 1, 0, 1]
 
 
+# Define the optimal control problems
 @def ocp1 begin
     s ∈ [0, 1], time
     y = (x1, x2, x3, x4, tf) ∈ R⁵, state
@@ -58,7 +58,7 @@ end
     tf(1) → min
 end
 
-
+# Solving the problems
 initial_g = solve(ocp2; grid_size=1000, linear_solver="mumps")
 solution = solve(ocp1; grid_size=1000, init=initial_g, linear_solver="mumps")
 
@@ -82,11 +82,7 @@ end
 
 plot_sol(solution)
 
-t = solution.times
-q = solution.state
-u = solution.control
-p = solution.costate
-
+# Picking 1/n points of the solution
 function n_points(n, sol)
     t = sol.times
     q = sol.state
@@ -119,13 +115,9 @@ q1 = [elt[1] for elt in n_points_q]
 q2 = [elt[2] for elt in n_points_q]
 q3 = [elt[3] for elt in n_points_q]
 q4 = [elt[4] for elt in n_points_q]
-t_points = n_points_t
 
-plot(t_points, q1, label="q1")
-plot(q1, q2, label="q2")
-plot!(t_points, q3, label="q3")
-plot!(t_points, q4, label="q4")
-#exporting the data
+
+#Exporting the data
 
 using CSV
 using DataFrames
