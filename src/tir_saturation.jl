@@ -78,7 +78,7 @@ F1(q) = [ F1i(q[1:2]); (1 - ϵ) * F1i(q[3:4]) ]
 
 initial_g = solve(ocp2; grid_size=1000, linear_solver="mumps")
 solution = solve(ocp1; grid_size=1000, init=initial_g, linear_solver="mumps")
-
+#plot(solution)
 H0 = Lift(F0) 
 H1 = Lift(F1)
 H01  = @Lie { H0, H1 }
@@ -90,12 +90,9 @@ t = solution.times
 q = solution.state
 u = solution.control
 p = solution.costate
-#φ(t) = H1(q(t), p(t))
-wh =p(0)
+
 umax = 1
 u0 = 0
-#tolerances = (abstol=1e-14, reltol=1e-10)
-#H1_plot = plot(t, φ,     label = "H₁(x(t), p(t))")
 fₚ = Flow(ocp1, (q, p, tf) -> umax)
 fₘ = Flow(ocp1, (q, p, tf) -> - umax)
 fs = Flow(ocp1, (q, p, tf) -> us(q, p))
@@ -144,10 +141,7 @@ tf = solution.objective
 q1, p1 = q(t1), p(t1)
 q2, p2 = q(t2), p(t2)
 q3, p3 = q(t3), p(t3)
-#p0[1], q0[1], p0[3], q0[3]= -p0[1], -q0[1], -p0[3], -q0[3]
-#p1[1], q1[1], p1[3], q1[3]= -p1[1], -q1[1], -p1[3], -q1[3]
-#p2[1], q2[1], p2[3], q2[3]= -p2[1], -q2[1], -p2[3], -q2[3]
-#p3[1], q3[1], p3[3], q3[3]= -p3[1], -q3[1], -p3[3], -q3[3]
+
 println("p0 = ", p0)
 println("t1 = ", t1)
 println("t2 = ", t2)
@@ -161,17 +155,16 @@ q1[2] = zs
 p1[2] = p1[1] * (zs / q1[1])
 q1[4] = zs
 p1[4] = p1[3] *(zs / q1[3])
-p0[1] = -1
-p0[3] = -1
+
 s = similar(p0, 32)
 shoot!(s, p0, t1, t2, t3, tf, q1, p1, q2, p2, q3, p3)
 println("Norm of the shooting function: ‖s‖ = ", norm(s), "\n")
-plot(solution)
+#plot(solution)
 nle = (s, ξ) -> shoot!(s, ξ[1:4], ξ[5], ξ[6], ξ[7], ξ[8], ξ[9:12], ξ[13:16], ξ[17:20], ξ[21:24], ξ[25:28], ξ[29:32])   # auxiliary function
                                                                # with aggregated inputs
 ξ = [ p0 ; t1 ; t2 ; t3 ; tf ; q1 ; p1 ; q2 ; p2 ; q3 ; p3 ]                                 
 
-indirect_sol = fsolve(nle, ξ; show_trace=true)
+indirect_sol = fsolve(nle, ξ; show_trace=true, tol=1e-6)
 
 
 p0i = indirect_sol.x[1:4]
