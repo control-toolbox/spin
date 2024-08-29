@@ -95,17 +95,19 @@ function n_points(n, sol)
     n_points_p = []
     n_points_q = []
     n_points_u = []
+    n_points_t = []
     for i in eachindex(t)
         if (i-1) % n == 0
             push!(n_points_p, p(t[i]))
             push!(n_points_q, q(t[i]))
             push!(n_points_u, u(t[i]))
+            push!(n_points_t, t[i])
         end
     end
-    return n_points_p, n_points_q, n_points_u
+    return n_points_p, n_points_q, n_points_u, n_points_t
 end
 
-n_points_p, n_points_q, n_points_u = n_points(2, solution)
+n_points_p, n_points_q, n_points_u, n_points_t = n_points(2, solution)
 
 # Separate the states and costates
 p1 = [elt[1] for elt in n_points_p]
@@ -117,8 +119,12 @@ q1 = [elt[1] for elt in n_points_q]
 q2 = [elt[2] for elt in n_points_q]
 q3 = [elt[3] for elt in n_points_q]
 q4 = [elt[4] for elt in n_points_q]
+t_points = n_points_t
 
-
+plot(t_points, q1, label="q1")
+plot(q1, q2, label="q2")
+plot!(t_points, q3, label="q3")
+plot!(t_points, q4, label="q4")
 #exporting the data
 
 using CSV

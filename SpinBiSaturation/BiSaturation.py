@@ -37,14 +37,14 @@ class BiSaturation:
         xp[1] = self.q2
         xp[2] = self.q3
         xp[3] = self.q4
-        xp[4] = np.full_like(time, 44.7695)
+        xp[4] = np.full_like(time, 44.76952614788222)
         xp[5] = self.p1
         xp[6] = self.p2
         xp[7] = self.p3
         xp[8] = self.p4
         xp[9] = self.p5
         z = np.zeros((3, len(time)))
-        z[0] =self.u
+        z[0] = self.u
         return time, xp, z
 
     def ode(self, time, xp, z):
@@ -76,7 +76,7 @@ class BiSaturation:
         u, _, _= z
 
         fxp = np.zeros((2 * n, 2 * n, time.size))
-        # Line 0 : (- self.gamma1 * x[0] - x[1] * u) * x[4]
+        
         fxp[0, 0] = - self.gamma1 * x[4]
         fxp[0, 1] = - u * x[4]
         fxp[0, 4] = - self.gamma1 * x[0] - x[1] * u
